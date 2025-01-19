@@ -1,0 +1,21 @@
+{
+  "name": "com.daftapplegames.daftapple-shared",
+  "version": "1.0.0",
+  "displayName": "Daft Apple Games Shared Package",
+  "description": "A number of scripts and asssets shared across all Daft Apple custom Unity packages",
+  "unity": "6000.0",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "dependencies": {
+
+ },
+ "keywords": [
+    "Daft Apple Games",
+  ],
+  "author": {
+    "name": "Oli Ollerenshaw",
+    "email": "oli@mroshaw.co.uk",
+    "url": ""
+  }
+}
