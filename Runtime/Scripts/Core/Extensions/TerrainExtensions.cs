@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace DDaftAppleGames.Extensions
+namespace DaftAppleGames.Extensions
 {
     public static class TerrainExtensions
     {
