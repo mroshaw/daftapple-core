@@ -3,11 +3,11 @@
 namespace DaftAppleGames.Attributes
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-    public class FoldoutAttribute : MetaAttribute, IGroupAttribute
+    public class FoldoutGroupAttribute : MetaAttribute, IGroupAttribute
     {
         public string Name { get; private set; }
 
-        public FoldoutAttribute(string name)
+        public FoldoutGroupAttribute(string name)
         {
             Name = name;
         }

@@ -8,7 +8,7 @@ namespace DaftAppleGames.Attributes.Editor
 {
     [CanEditMultipleObjects]
     [CustomEditor(typeof(UnityEngine.Object), true)]
-    public class NaughtyInspector : UnityEditor.Editor
+    public class DaftAppleInspector : UnityEditor.Editor
     {
         private List<SerializedProperty> _serializedProperties = new List<SerializedProperty>();
         private IEnumerable<FieldInfo> _nonSerializedFields;
@@ -205,8 +205,8 @@ namespace DaftAppleGames.Attributes.Editor
         private static IEnumerable<IGrouping<string, SerializedProperty>> GetFoldoutProperties(IEnumerable<SerializedProperty> properties)
         {
             return properties
-                .Where(p => PropertyUtility.GetAttribute<FoldoutAttribute>(p) != null)
-                .GroupBy(p => PropertyUtility.GetAttribute<FoldoutAttribute>(p).Name);
+                .Where(p => PropertyUtility.GetAttribute<FoldoutGroupAttribute>(p) != null)
+                .GroupBy(p => PropertyUtility.GetAttribute<FoldoutGroupAttribute>(p).Name);
         }
 
         private static GUIStyle GetHeaderGUIStyle()
