@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace DaftAppleGames.Darskerry.Core.Extensions
+namespace DaftAppleGames.Extensions
 {
     public static class StringExtensions
     {

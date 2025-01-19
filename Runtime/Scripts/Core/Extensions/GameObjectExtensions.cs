@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace DaftAppleGames.Darskerry.Core.Extensions
+namespace DaftAppleGames.Extensions
 {
     public static class GameObjectExtensions
     {

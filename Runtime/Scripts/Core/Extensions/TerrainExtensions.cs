@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace DaftAppleGames.Darskerry.Core.Extensions
+namespace DDaftAppleGames.Extensions
 {
     public static class TerrainExtensions
     {

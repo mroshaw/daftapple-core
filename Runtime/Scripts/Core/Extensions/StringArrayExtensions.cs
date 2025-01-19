@@ -1,6 +1,6 @@
 using System;
 
-namespace DaftAppleGames.Darskerry.Core.Extensions
+namespace DaftAppleGames.Extensions
 {
     public static class StringArrayExtensions
     {
