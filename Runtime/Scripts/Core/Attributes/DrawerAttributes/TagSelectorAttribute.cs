@@ -3,7 +3,7 @@
 namespace DaftAppleGames.Attributes
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-    public class TagAttribute : DrawerAttribute
+    public class TagSelectorAttribute : DrawerAttribute
     {
     }
 }

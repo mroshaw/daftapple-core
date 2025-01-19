@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace DaftAppleGames.Attributes.Editor
 {
-    [CustomPropertyDrawer(typeof(TagAttribute))]
-    public class TagPropertyDrawer : PropertyDrawerBase
+    [CustomPropertyDrawer(typeof(TagSelectorAttribute))]
+    public class TagSelectorPropertyDrawer : PropertyDrawerBase
     {
         protected override float GetPropertyHeight_Internal(SerializedProperty property, GUIContent label)
         {
@@ -52,7 +52,7 @@ namespace DaftAppleGames.Attributes.Editor
             }
             else
             {
-                string message = string.Format("{0} supports only string fields", typeof(TagAttribute).Name);
+                string message = string.Format("{0} supports only string fields", typeof(TagSelectorAttribute).Name);
                 DrawDefaultPropertyAndHelpBox(rect, property, message, MessageType.Warning);
             }
 
