@@ -3,9 +3,10 @@ using System.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DaftAppleGames.Attributes;
 using UnityEngine;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public static class PropertyUtility
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public static class ReflectionUtility
     {

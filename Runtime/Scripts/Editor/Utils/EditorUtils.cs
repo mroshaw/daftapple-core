@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace DaftAppleGames.Utils.Editor
+namespace DaftAppleGames.Editor.Utils
 {
     public static class EditorUtils
     {

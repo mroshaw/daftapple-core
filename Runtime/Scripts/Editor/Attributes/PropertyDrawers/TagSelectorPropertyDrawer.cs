@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using DaftAppleGames.Attributes;
 using UnityEditor;
 using UnityEngine;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     [CustomPropertyDrawer(typeof(TagSelectorAttribute))]
     public class TagSelectorPropertyDrawer : PropertyDrawerBase

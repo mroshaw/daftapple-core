@@ -2,13 +2,14 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
+using DaftAppleGames.Attributes;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
-    public static class NaughtyEditorGUI
+    public static class DaftAppleEditorGUI
     {
         public const float IndentLength = 15.0f;
         public const float HorizontalSpacing = 2.0f;

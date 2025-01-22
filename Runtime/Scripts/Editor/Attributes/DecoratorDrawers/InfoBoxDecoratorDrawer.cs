@@ -1,7 +1,8 @@
-﻿using UnityEditor;
+﻿using DaftAppleGames.Attributes;
+using UnityEditor;
 using UnityEngine;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     [CustomPropertyDrawer(typeof(InfoBoxAttribute))]
     public class InfoBoxDecoratorDrawer : DecoratorDrawer
@@ -15,7 +16,7 @@ namespace DaftAppleGames.Attributes.Editor
         {
             InfoBoxAttribute infoBoxAttribute = (InfoBoxAttribute)attribute;
 
-            float indentLength = NaughtyEditorGUI.GetIndentLength(rect);
+            float indentLength = DaftAppleEditorGUI.GetIndentLength(rect);
             Rect infoBoxRect = new Rect(
                 rect.x + indentLength,
                 rect.y,
@@ -53,7 +54,7 @@ namespace DaftAppleGames.Attributes.Editor
                     break;
             }
 
-            NaughtyEditorGUI.HelpBox(rect, infoText, messageType);
+            DaftAppleEditorGUI.HelpBox(rect, infoText, messageType);
         }
     }
 }

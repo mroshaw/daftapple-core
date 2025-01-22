@@ -2,8 +2,9 @@
 using UnityEditor;
 using UnityEditorInternal;
 using System.Collections.Generic;
+using DaftAppleGames.Attributes;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public class ReorderableListPropertyDrawer : SpecialCasePropertyDrawerBase
     {
@@ -96,7 +97,7 @@ namespace DaftAppleGames.Attributes.Editor
             else
             {
                 string message = typeof(ReorderableListAttribute).Name + " can be used only on arrays or lists";
-                NaughtyEditorGUI.HelpBox_Layout(message, MessageType.Warning, context: property.serializedObject.targetObject);
+                DaftAppleEditorGUI.HelpBox_Layout(message, MessageType.Warning, context: property.serializedObject.targetObject);
                 EditorGUILayout.PropertyField(property, true);
             }
         }

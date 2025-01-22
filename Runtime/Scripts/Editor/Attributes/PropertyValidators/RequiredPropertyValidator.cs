@@ -1,6 +1,7 @@
-﻿using UnityEditor;
+﻿using DaftAppleGames.Attributes;
+using UnityEditor;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public class RequiredPropertyValidator : PropertyValidatorBase
     {
@@ -18,13 +19,13 @@ namespace DaftAppleGames.Attributes.Editor
                         errorMessage = requiredAttribute.Message;
                     }
 
-                    NaughtyEditorGUI.HelpBox_Layout(errorMessage, MessageType.Error, context: property.serializedObject.targetObject);
+                    DaftAppleEditorGUI.HelpBox_Layout(errorMessage, MessageType.Error, context: property.serializedObject.targetObject);
                 }
             }
             else
             {
                 string warning = requiredAttribute.GetType().Name + " works only on reference types";
-                NaughtyEditorGUI.HelpBox_Layout(warning, MessageType.Warning, context: property.serializedObject.targetObject);
+                DaftAppleEditorGUI.HelpBox_Layout(warning, MessageType.Warning, context: property.serializedObject.targetObject);
             }
         }
     }

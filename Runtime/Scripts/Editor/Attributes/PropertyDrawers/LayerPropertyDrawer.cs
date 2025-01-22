@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using DaftAppleGames.Attributes;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     [CustomPropertyDrawer(typeof(LayerAttribute))]
     public class LayerPropertyDrawer : PropertyDrawerBase

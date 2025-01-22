@@ -1,7 +1,8 @@
-﻿using UnityEditor;
+﻿using DaftAppleGames.Attributes;
+using UnityEditor;
 using UnityEngine;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public abstract class PropertyDrawerBase : PropertyDrawer
     {
@@ -16,7 +17,7 @@ namespace DaftAppleGames.Attributes.Editor
 
             // Validate
             ValidatorAttribute[] validatorAttributes = PropertyUtility.GetAttributes<ValidatorAttribute>(property);
-            foreach (var validatorAttribute in validatorAttributes)
+            foreach (ValidatorAttribute validatorAttribute in validatorAttributes)
             {
                 validatorAttribute.GetValidator().ValidateProperty(property);
             }
@@ -73,14 +74,14 @@ namespace DaftAppleGames.Attributes.Editor
 
         public void DrawDefaultPropertyAndHelpBox(Rect rect, SerializedProperty property, string message, MessageType messageType)
         {
-            float indentLength = NaughtyEditorGUI.GetIndentLength(rect);
+            float indentLength = DaftAppleEditorGUI.GetIndentLength(rect);
             Rect helpBoxRect = new Rect(
                 rect.x + indentLength,
                 rect.y,
                 rect.width - indentLength,
                 GetHelpBoxHeight());
 
-            NaughtyEditorGUI.HelpBox(helpBoxRect, message, MessageType.Warning, context: property.serializedObject.targetObject);
+            DaftAppleEditorGUI.HelpBox(helpBoxRect, message, MessageType.Warning, context: property.serializedObject.targetObject);
 
             Rect propertyRect = new Rect(
                 rect.x,

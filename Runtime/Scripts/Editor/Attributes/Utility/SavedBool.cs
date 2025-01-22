@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     internal class SavedBool
     {

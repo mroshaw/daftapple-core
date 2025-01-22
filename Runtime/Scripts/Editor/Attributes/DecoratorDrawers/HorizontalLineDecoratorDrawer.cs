@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using DaftAppleGames.Attributes;
+using UnityEngine;
 using UnityEditor;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     [CustomPropertyDrawer(typeof(HorizontalLineAttribute))]
     public class HorizontalLineDecoratorDrawer : DecoratorDrawer
@@ -17,7 +18,7 @@ namespace DaftAppleGames.Attributes.Editor
             Rect rect = EditorGUI.IndentedRect(position);
             rect.y += EditorGUIUtility.singleLineHeight / 3.0f;
             HorizontalLineAttribute lineAttr = (HorizontalLineAttribute)attribute;
-            NaughtyEditorGUI.HorizontalLine(rect, lineAttr.Height, lineAttr.Color.GetColor());
+            DaftAppleEditorGUI.HorizontalLine(rect, lineAttr.Height, lineAttr.Color.GetColor());
         }
     }
 }

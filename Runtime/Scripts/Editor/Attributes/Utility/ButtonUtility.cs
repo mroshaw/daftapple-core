@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Reflection;
 using System.Collections.Generic;
+using DaftAppleGames.Attributes;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public static class ButtonUtility
     {

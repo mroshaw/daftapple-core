@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using DaftAppleGames.Attributes;
 using UnityEditor;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public abstract class PropertyValidatorBase
     {

@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DaftAppleGames.Attributes;
 using UnityEditor;
 using UnityEngine;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     [CanEditMultipleObjects]
     [CustomEditor(typeof(UnityEngine.Object), true)]
@@ -84,7 +85,7 @@ namespace DaftAppleGames.Attributes.Editor
                 }
                 else
                 {
-                    NaughtyEditorGUI.PropertyField_Layout(property, includeChildren: true);
+                    DaftAppleEditorGUI.PropertyField_Layout(property, includeChildren: true);
                 }
             }
 
@@ -97,13 +98,13 @@ namespace DaftAppleGames.Attributes.Editor
                     continue;
                 }
 
-                NaughtyEditorGUI.BeginBoxGroup_Layout(group.Key);
+                DaftAppleEditorGUI.BeginBoxGroup_Layout(group.Key);
                 foreach (var property in visibleProperties)
                 {
-                    NaughtyEditorGUI.PropertyField_Layout(property, includeChildren: true);
+                    DaftAppleEditorGUI.PropertyField_Layout(property, includeChildren: true);
                 }
 
-                NaughtyEditorGUI.EndBoxGroup_Layout();
+                DaftAppleEditorGUI.EndBoxGroup_Layout();
             }
 
             // Draw foldout serialized properties
@@ -125,7 +126,7 @@ namespace DaftAppleGames.Attributes.Editor
                 {
                     foreach (var property in visibleProperties)
                     {
-                        NaughtyEditorGUI.PropertyField_Layout(property, true);
+                        DaftAppleEditorGUI.PropertyField_Layout(property, true);
                     }
                 }
             }
@@ -141,13 +142,13 @@ namespace DaftAppleGames.Attributes.Editor
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("Non-Serialized Fields", GetHeaderGUIStyle());
-                    NaughtyEditorGUI.HorizontalLine(
+                    DaftAppleEditorGUI.HorizontalLine(
                         EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
                 }
 
                 foreach (var field in _nonSerializedFields)
                 {
-                    NaughtyEditorGUI.NonSerializedField_Layout(serializedObject.targetObject, field);
+                    DaftAppleEditorGUI.NonSerializedField_Layout(serializedObject.targetObject, field);
                 }
             }
         }
@@ -160,13 +161,13 @@ namespace DaftAppleGames.Attributes.Editor
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("Native Properties", GetHeaderGUIStyle());
-                    NaughtyEditorGUI.HorizontalLine(
+                    DaftAppleEditorGUI.HorizontalLine(
                         EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
                 }
 
                 foreach (var property in _nativeProperties)
                 {
-                    NaughtyEditorGUI.NativeProperty_Layout(serializedObject.targetObject, property);
+                    DaftAppleEditorGUI.NativeProperty_Layout(serializedObject.targetObject, property);
                 }
             }
         }
@@ -179,13 +180,13 @@ namespace DaftAppleGames.Attributes.Editor
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("Buttons", GetHeaderGUIStyle());
-                    NaughtyEditorGUI.HorizontalLine(
+                    DaftAppleEditorGUI.HorizontalLine(
                         EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
                 }
 
                 foreach (var method in _methods)
                 {
-                    NaughtyEditorGUI.Button(serializedObject.targetObject, method);
+                    DaftAppleEditorGUI.Button(serializedObject.targetObject, method);
                 }
             }
         }

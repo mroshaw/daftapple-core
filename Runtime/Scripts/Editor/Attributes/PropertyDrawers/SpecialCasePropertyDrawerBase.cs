@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using DaftAppleGames.Attributes;
 using UnityEditor;
 using UnityEngine;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public abstract class SpecialCasePropertyDrawerBase
     {

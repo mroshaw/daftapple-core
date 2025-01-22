@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using DaftAppleGames.Attributes;
+using UnityEngine;
 using UnityEditor;
 
-namespace DaftAppleGames.Attributes.Editor
+namespace DaftAppleGames.Editor.Attributes
 {
     public class MaxValuePropertyValidator : PropertyValidatorBase
     {
