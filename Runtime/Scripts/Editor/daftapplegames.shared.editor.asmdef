@@ -1,5 +1,5 @@
 {
-    "name": "daftapplegames.shared.editor",
+    "name": "DaftAppleGames.Shared.Editor",
     "rootNamespace": "",
     "references": [
         "GUID:388f132624f9dfc408864ea2764b7698"
