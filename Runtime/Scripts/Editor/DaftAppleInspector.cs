@@ -38,8 +38,8 @@ namespace DaftAppleGames.Editor.Attributes
         {
             GetSerializedProperties(ref _serializedProperties);
 
-            bool anyNaughtyAttribute = _serializedProperties.Any(p => PropertyUtility.GetAttribute<IAttribute>(p) != null);
-            if (!anyNaughtyAttribute)
+            bool anyCustomAttribute = _serializedProperties.Any(p => PropertyUtility.GetAttribute<IAttribute>(p) != null);
+            if (!anyCustomAttribute)
             {
                 DrawDefaultInspector();
             }
