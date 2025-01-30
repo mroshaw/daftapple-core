@@ -11,7 +11,7 @@
     {
       "displayName": "Sample Assets",
       "description": "Samples of various baseline configuration and tooling.",
-      "path": "Samples/DemoPackage"
+      "path": "Samples~/DemoPackage"
     }
   ],
   "keywords": [
