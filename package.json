@@ -10,6 +10,13 @@
   "keywords": [
     "Daft Apple Games"
   ],
+  "samples": [
+    {
+      "displayName": "Sample Assets",
+      "description": "Samples of various baseline configuration and tooling.",
+      "path": "Samples/DemoPackage"
+    }
+  ],
   "author": {
     "name": "Oli Ollerenshaw",
     "email": "oli@mroshaw.co.uk",
