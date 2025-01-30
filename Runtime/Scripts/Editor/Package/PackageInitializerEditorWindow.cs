@@ -13,10 +13,10 @@ namespace DaftAppleGames.Editor
     {
         [SerializeField] private VisualTreeAsset tree;
         [SerializeField] private PackageContents packageContents;
-
-        [SerializeField] private bool loggingEnabled;
+        [SerializeField] private bool loggingEnabled = true;
         [SerializeField] string logText;
         [SerializeField] private string introText;
+        [SerializeField] private string baseInstallLocation;
 
         private Button _installButton;
         private Button _unInstallButton;
@@ -24,7 +24,7 @@ namespace DaftAppleGames.Editor
         private Button _clearLogButton;
 
         private TextField _logTextField;
-        
+
         private SerializedObject _serializedObject;
 
         public void CreateGUI()
@@ -77,10 +77,14 @@ namespace DaftAppleGames.Editor
 
             introText = GetIntroText();
 
+            baseInstallLocation = GetBaseInstallLocation();
+
             ClearLog();
         }
 
         protected abstract string GetIntroText();
+
+        protected abstract string GetBaseInstallLocation();
 
         private void Install()
         {
@@ -91,7 +95,7 @@ namespace DaftAppleGames.Editor
             }
 
             Log(LogLevel.Info, $"Installing... Logging is: {loggingEnabled}", true);
-            bool installResult = packageContents.Install(LogDelegate);
+            bool installResult = packageContents.Install(LogDelegate, baseInstallLocation);
             if (installResult)
             {
                 Log(LogLevel.Info,$"Install Complete!", true);

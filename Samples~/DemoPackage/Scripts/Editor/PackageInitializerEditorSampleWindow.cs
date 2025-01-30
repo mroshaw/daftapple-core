@@ -21,5 +21,10 @@ namespace DaftAppleGames.Editor
         {
             return "Welcome to the Daft Apple Games sample package!";
         }
+
+        protected override string GetBaseInstallLocation()
+        {
+            return "Assets/Sample Package";
+        }
     }
 }

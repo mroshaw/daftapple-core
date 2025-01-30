@@ -17,7 +17,6 @@ namespace DaftAppleGames.Editor.Package
     [CreateAssetMenu(fileName = "PackageContents", menuName = "Daft Apple Games/Package/Package Contents", order = 1)]
     public class PackageContents : ScriptableObject
     {
-        [BoxGroup("Package Settings")] public string baseInstallLocation;
         [BoxGroup("Package Contents")] public PackageItem[] packageItems;
 
         [SerializeField] private bool isInstalled = false;
@@ -26,7 +25,7 @@ namespace DaftAppleGames.Editor.Package
 
         public UnityEvent<bool> onInstallStateChanged;
 
-        public bool Install(Action<LogLevel, string> logDelegate)
+        public bool Install(Action<LogLevel, string> logDelegate, string baseInstallLocation)
         {
             bool installedState = true;
 

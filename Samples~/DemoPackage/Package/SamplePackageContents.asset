@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6959d79451d9a3145b8a16b7d17a2d51, type: 3}
   m_Name: SamplePackageContents
   m_EditorClassIdentifier: 
-  baseInstallLocation: Assets\Sample Package
   packageItems:
   - itemAsset: {fileID: 4300395992776787461, guid: 86dc43d7542e487418da37b2ed3bac27, type: 3}
     itemDestinationPath: Prefabs
@@ -20,7 +19,8 @@ MonoBehaviour:
   - itemAsset: {fileID: 11400000, guid: c0d764a579f8efa4b8e58a6175594d41, type: 2}
     itemDestinationPath: Volumes
     overwriteExisting: 0
-  isInstalled: 0
+  isInstalled: 1
+  welcomeWindowDisplayed: 0
   onInstallStateChanged:
     m_PersistentCalls:
       m_Calls: []
