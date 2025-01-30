@@ -7,15 +7,15 @@
   "documentationUrl": "https://example.com/",
   "changelogUrl": "https://example.com/changelog.html",
   "licensesUrl": "https://example.com/licensing.html",
-  "keywords": [
-    "Daft Apple Games"
-  ],
   "samples": [
     {
       "displayName": "Sample Assets",
       "description": "Samples of various baseline configuration and tooling.",
       "path": "Samples/DemoPackage"
     }
+  ],
+  "keywords": [
+    "Daft Apple Games"
   ],
   "author": {
     "name": "Oli Ollerenshaw",
