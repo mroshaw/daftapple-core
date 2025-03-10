@@ -1,6 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
+#if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
+#else
+using DaftAppleGames.Attributes;
+#endif
 
 namespace DaftAppleGames.Scenes
 {
@@ -8,7 +12,11 @@ namespace DaftAppleGames.Scenes
     public class AdditiveSceneLoaderSettings : ScriptableObject
     {
         [BoxGroup("Loader Scene")] public AdditiveScene loaderScene;
+#if ODIN_INSPECTOR
         [BoxGroup("Scenes")] [TableList] public List<AdditiveScene> additiveScenes;
+#else
+        [BoxGroup("Scenes")] public List<AdditiveScene> additiveScenes;
+#endif
 #if UNITY_EDITOR
         public List<string> GetAllScenePaths()
         {
