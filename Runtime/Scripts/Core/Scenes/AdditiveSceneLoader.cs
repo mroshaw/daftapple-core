@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
 #if GPU_INSTANCER
-
+using GPUInstancer;
 #endif
 
 #else
@@ -28,12 +28,22 @@ namespace DaftAppleGames.Scenes
         [BoxGroup("Scenes")] [SerializeField] private AdditiveSceneLoaderSettings additiveSceneLoaderSettings;
 
         [FoldoutGroup("Events")] public UnityEvent loadStartedEvent;
-        [FoldoutGroup("Events")] public UnityEvent scenesLoadedEvent;
-        [FoldoutGroup("Events")] public UnityEvent scenesActivatedEvent;
+        [FoldoutGroup("Events")] public UnityEvent<string> sceneLoadedEvent;
+        [FoldoutGroup("Events")] public UnityEvent<string> sceneActivatedEvent;
+        [FoldoutGroup("Events")] public UnityEvent allScenesLoadedEvent;
+        [FoldoutGroup("Events")] public UnityEvent allScenesActivatedEvent;
+        [FoldoutGroup("Events")] public UnityEvent everythingReadyEvent;
+
         [FoldoutGroup("Events")] public UnityEvent<float> loadProgressUpdatedEvent;
 
         public SceneLoadStatus SceneLoadStatus => _sceneLoadStatus;
         private SceneLoadStatus _sceneLoadStatus;
+
+        private bool _scenesReady = false;
+
+#if GPU_INSTANCER
+        private bool _gpuInstancerDetailReady;
+#endif
 
         private void OnEnable()
         {
@@ -42,11 +52,27 @@ namespace DaftAppleGames.Scenes
 
         private void Awake()
         {
+#if GPU_INSTANCER
+            _gpuInstancerDetailReady = true;
+
+            GPUInstancerAPI.StartListeningGPUIEvent(GPUInstancerEventType.DetailInitializationFinished, GPUInstancerDetailManagerReady);
+#endif
             _sceneLoadStatus = SceneLoadStatus.Idle;
 
             if (loadScenesOnAwake)
             {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    LoadScenesInEditor();
+                }
+                else
+                {
+                    LoadAndActivateAllScenes();
+                }
+#else
                 LoadAndActivateAllScenes();
+#endif
             }
         }
 
@@ -54,7 +80,18 @@ namespace DaftAppleGames.Scenes
         {
             if (loadScenesOnStart)
             {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    LoadScenesInEditor();
+                }
+                else
+                {
+                    LoadAndActivateAllScenes();
+                }
+#else
                 LoadAndActivateAllScenes();
+#endif
             }
         }
 
@@ -71,38 +108,63 @@ namespace DaftAppleGames.Scenes
             UpdateProgress();
         }
 
-        private IEnumerator LoadAllScenesAsync()
+        private void CheckEverythingReady()
         {
+            if (IsEverythingReady())
+            {
+                Debug.Log("Everything ready!");
+                everythingReadyEvent?.Invoke();
+            }
+        }
+
+        private bool IsEverythingReady()
+        {
+#if GPU_INSTANCER
+            return _scenesReady && IsGPUInstancerReady();
+#else
+            return _scenesReady;
+#endif
+        }
+
+#if GPU_INSTANCER
+        private void GPUInstancerDetailManagerReady()
+        {
+            Debug.Log("GPU Instancer Detail Manager ready!");
+            GPUInstancerAPI.StopListeningGPUIEvent(GPUInstancerEventType.DetailInitializationFinished, GPUInstancerDetailManagerReady);
+            _gpuInstancerDetailReady = true;
+            CheckEverythingReady();
+        }
+
+        private bool IsGPUInstancerReady()
+        {
+            return _gpuInstancerDetailReady;
+        }
+#endif
+        private IEnumerator LoadAndActivateAllScenesAsync()
+        {
+#if UNITY_EDITOR
+            UnloadScenesInEditor();
+#endif
+
             ShowProgress();
             loadStartedEvent?.Invoke();
             _sceneLoadStatus = SceneLoadStatus.Loading;
 
             // Load scenes
-            LoadScenes(LoadSceneMode.Additive);
+            yield return LoadScenesAsync(LoadSceneMode.Additive);
+            Debug.Log("AdditiveSceneLoader: All scenes loaded");
 
-            // Wait for all scenes to load
-            while (!AllScenesInState(SceneLoadStatus.Loaded))
-            {
-                yield return null;
-            }
-
-            scenesLoadedEvent?.Invoke();
-            _sceneLoadStatus = SceneLoadStatus.Activating;
+            // Activate scenes
+            yield return ActivateScenesAsync();
+            Debug.Log("AdditiveSceneLoader: All scenes activated");
 
             HideProgress();
 
-            // Activate scenes
-            ActivateScenes();
-
-            // Wait for all scenes to activate
-            while (!AllScenesInState(SceneLoadStatus.Activated))
-            {
-                yield return null;
-            }
-
             // Done!
             yield return new WaitForSeconds(1);
-            scenesActivatedEvent?.Invoke();
+            Debug.Log("AdditiveSceneLoader: Done");
+            _scenesReady = true;
+            CheckEverythingReady();
         }
 
         /// <summary>
@@ -121,37 +183,79 @@ namespace DaftAppleGames.Scenes
             return true;
         }
 
-        /// <summary>
-        /// Iterate and load each Additive scene asynchronously
-        /// </summary>
-        private void LoadScenes(LoadSceneMode loadSceneMode)
+#if UNITY_EDITOR
+        [Button("Unload Scenes")]
+        private void UnloadScenesInEditor()
+        {
+            int countLoaded = SceneManager.sceneCount;
+            Scene activeScene = EditorSceneManager.GetActiveScene();
+            Scene[] loadedScenes = new Scene[countLoaded];
+
+            // Get array of active scenes
+            for (int i = 0; i < countLoaded; i++)
+            {
+                loadedScenes[i] = SceneManager.GetSceneAt(i);
+            }
+
+            // Close all but the open one
+            for (int i = countLoaded - 1; i >= 0 ; i--)
+            {
+                Scene currScene = loadedScenes[i];
+                if (currScene.name != additiveSceneLoaderSettings.loaderScene.sceneName)
+                {
+                    EditorSceneManager.UnloadScene(currScene);
+                }
+            }
+        }
+#endif
+
+#if UNITY_EDITOR
+        [Button("Load Scenes")]
+        public void LoadScenesInEditor()
         {
             foreach (AdditiveScene additiveScene in additiveSceneLoaderSettings.additiveScenes)
             {
-#if UNITY_EDITOR
                 Debug.Log($"Starting Editor load of scene: {additiveScene.sceneName}...");
                 Scene currentScene = EditorSceneManager.GetSceneByName(additiveScene.sceneName);
                 if (!currentScene.IsValid())
                 {
-                    if (!Application.isPlaying)
-                    {
-                        EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(additiveScene.sceneAsset), OpenSceneMode.Additive);
-                        additiveScene.LoadStatus = SceneLoadStatus.Loaded;
-                    }
-                    else
-                    {
-                        StartCoroutine(LoadSceneAsync(additiveScene, loadSceneMode));
-                    }
+                    EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(additiveScene.sceneAsset), OpenSceneMode.Additive);
+                    additiveScene.LoadStatus = SceneLoadStatus.Loaded;
                 }
                 else
                 {
                     Debug.Log($"Already Loaded: {additiveScene.sceneName}");
                     additiveScene.LoadStatus = SceneLoadStatus.Loaded;
                 }
-#else
-                StartCoroutine(LoadSceneAsync(additiveScene, loadSceneMode));
-#endif
+
+                if (additiveScene.isMain)
+                {
+                    EditorSceneManager.SetActiveScene(SceneManager.GetSceneByName(additiveScene.sceneName));
+                }
             }
+        }
+#endif
+
+        private IEnumerator LoadScenesAsync(LoadSceneMode loadSceneMode)
+        {
+            _sceneLoadStatus = SceneLoadStatus.Loading;
+            foreach (AdditiveScene additiveScene in additiveSceneLoaderSettings.additiveScenes)
+            {
+                yield return LoadSceneAsync(additiveScene, loadSceneMode);
+            }
+
+            allScenesLoadedEvent?.Invoke();
+        }
+
+        private IEnumerator ActivateScenesAsync()
+        {
+            _sceneLoadStatus = SceneLoadStatus.Activating;
+            foreach (AdditiveScene additiveScene in additiveSceneLoaderSettings.additiveScenes)
+            {
+                yield return ActivateSceneAsync(additiveScene);
+            }
+
+            allScenesActivatedEvent?.Invoke();
         }
 
         /// <summary>
@@ -177,16 +281,10 @@ namespace DaftAppleGames.Scenes
 
             Debug.Log($"Async Load Scene: {additiveScene.sceneName}");
             //Begin to load the Scene
-#if UNITY_EDITOR
-            AsyncOperation asyncOperation =
-                EditorSceneManager.LoadSceneAsync(additiveScene.sceneName, loadSceneMode);
-            asyncOperation.allowSceneActivation = false;
 
-#else
             AsyncOperation asyncOperation =
                 SceneManager.LoadSceneAsync(additiveScene.sceneName, loadSceneMode);
             asyncOperation.allowSceneActivation = false;
-#endif
             additiveScene.SceneOp = asyncOperation;
 
             // When the load is still in progress, output the Text and progress bar
@@ -196,6 +294,7 @@ namespace DaftAppleGames.Scenes
             }
 
             additiveScene.LoadStatus = SceneLoadStatus.Loaded;
+            sceneLoadedEvent?.Invoke(additiveScene.sceneName);
             Debug.Log($"Async Load Scene DONE: {additiveScene.sceneName}");
             yield return null;
         }
@@ -220,17 +319,13 @@ namespace DaftAppleGames.Scenes
             }
 
             additiveScene.LoadStatus = SceneLoadStatus.Activated;
-            scenesActivatedEvent?.Invoke();
+            sceneActivatedEvent?.Invoke(additiveScene.sceneName);
             Debug.Log($"Async Activate Scene DONE: {additiveScene.sceneName}");
 
             if (additiveScene.isMain)
             {
                 Debug.Log($"Setting Main Scene: {additiveScene.sceneName}");
-#if UNITY_EDITOR
-                EditorSceneManager.SetActiveScene(SceneManager.GetSceneByName(additiveScene.sceneName));
-#else
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(additiveScene.sceneName));
-#endif
             }
         }
 
@@ -249,6 +344,7 @@ namespace DaftAppleGames.Scenes
             {
                 progressSlider.SetProgress(totalProgress);
             }
+
             loadProgressUpdatedEvent?.Invoke(totalProgress);
         }
 
@@ -264,16 +360,12 @@ namespace DaftAppleGames.Scenes
             }
         }
 
-        /// <summary>
-        /// Top level process orchestration
-        /// </summary>
-        [Button("Load Scenes")]
         public void LoadAndActivateAllScenes()
         {
             InitLoadStatus();
             Debug.Log($"Total Additive Scenes:{additiveSceneLoaderSettings.additiveScenes.Count}");
 
-            StartCoroutine(LoadAllScenesAsync());
+            StartCoroutine(LoadAndActivateAllScenesAsync());
         }
 
         private void ShowProgress()
@@ -292,28 +384,5 @@ namespace DaftAppleGames.Scenes
         {
             progressPanel.SetActive(false);
         }
-
-#if UNITY_EDITOR
-        [Button("Unload Scenes")]
-        public void UnloadScenes()
-        {
-            int sceneLoadedCount = EditorSceneManager.sceneCount;
-            Scene[] loadedScenes = new Scene[sceneLoadedCount];
-
-            for (int currSceneIndex = 0; currSceneIndex < sceneLoadedCount; currSceneIndex++)
-            {
-                loadedScenes[currSceneIndex] = EditorSceneManager.GetSceneAt(currSceneIndex);
-            }
-
-            foreach (Scene currScene in loadedScenes)
-            {
-                if (currScene.name != gameObject.scene.name)
-                {
-                    Debug.Log($"Closing... {currScene.name}");
-                    EditorSceneManager.CloseScene(currScene, true);
-                }
-            }
-        }
-#endif
     }
 }

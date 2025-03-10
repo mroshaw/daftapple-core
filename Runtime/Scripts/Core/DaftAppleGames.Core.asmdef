@@ -1,7 +1,9 @@
 {
     "name": "DaftAppleGames.Core",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:74b7ab95492e74e49804395faecc2951"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
