@@ -26,13 +26,17 @@ namespace DaftAppleGames.Editor.Utils
             GUILayout.Space(10);
 
             var myBoxStyle = new GUIStyle(GUI.skin.box);
-            myBoxStyle.normal.background = MakeTex(2, 2, new Color(0.6f, 0.6f, 0.6f, 0.5f));
 
             // Scene block
             GUILayout.BeginVertical(myBoxStyle);
             if (GUILayout.Button("Find in current scene"))
             {
                 FindMissingScriptsInCurrentScene();
+            }
+
+            if (GUILayout.Button("Delete in current scene"))
+            {
+                DeleteMissingScriptsInCurrentScene();
             }
 
             GUILayout.Label("Results (Open Scenes):", EditorStyles.boldLabel);
@@ -74,17 +78,6 @@ namespace DaftAppleGames.Editor.Utils
             }
 
             GUILayout.EndVertical();
-        }
-
-        private static Texture2D MakeTex(int width, int height, Color col)
-        {
-            var pix = new Color[width * height];
-            for (var i = 0; i < pix.Length; i++)
-                pix[i] = col;
-            var result = new Texture2D(width, height);
-            result.SetPixels(pix);
-            result.Apply();
-            return result;
         }
 
         private void FindMissingScriptsInCurrentScene()
@@ -129,6 +122,10 @@ namespace DaftAppleGames.Editor.Utils
                 if (Path.GetExtension(assetPath) == ".prefab")
                 {
                     var assetRoot = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+                    if (assetRoot == null)
+                    {
+                        continue;
+                    }
                     var components = assetRoot.GetComponentsInChildren<Component>(true);
                     var hasMissingScript = components.Any(c => c == null);
                     if (hasMissingScript)
@@ -136,6 +133,27 @@ namespace DaftAppleGames.Editor.Utils
                         missingAssets.Add(assetPath);
                     }
                 }
+            }
+        }
+
+        private void DeleteMissingScriptsInCurrentScene()
+        {
+            FindMissingScriptsInCurrentScene();
+            foreach (GameObject go in objectsWithMissingScriptsInCurrentScene)
+            {
+                GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+            }
+        }
+
+        private void DeleteMissingScriptsInAssets()
+        {
+            FindMissingScriptsInCurrentScene();
+            foreach (string path in missingAssets)
+            {
+                GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                GameObjectUtility.RemoveMonoBehavioursWithMissingScript(asset);
+                UnityEditor.EditorUtility.SetDirty(asset);
+                AssetDatabase.SaveAssets();
             }
         }
     }

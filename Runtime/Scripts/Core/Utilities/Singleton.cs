@@ -23,7 +23,13 @@ namespace DaftAppleGames.Utilities
                         {
                             GameObject go = new(typeof(T).ToString());
                             _instance = go.AddComponent<T>();
-                            // DontDestroyOnLoad(_instance.gameObject);
+                            DontDestroyOnLoad(_instance.gameObject);
+                            /*
+                            if (doNotDestroyOnLoad)
+                            {
+                                DontDestroyOnLoad(_instance.gameObject);
+                            }
+                            */
                         }
                     }
 
