@@ -1,5 +1,5 @@
 {
-    "name": "DaftAppleGames.Shared.Core",
+    "name": "DaftAppleGames.Core",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
