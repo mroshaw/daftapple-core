@@ -1,9 +1,12 @@
 using System;
+using System.Text.RegularExpressions;
 
 namespace DaftAppleGames.Extensions
 {
     public static class StringArrayExtensions
     {
+        private static readonly Regex Whitespace = new Regex(@"\s+");
+
         public static bool ItemInString(this string[] stringArray, string stringToCheck)
         {
             foreach (string arrayItem in stringArray)
@@ -16,6 +19,16 @@ namespace DaftAppleGames.Extensions
             }
 
             return false;
+        }
+
+        public static string RemoveWhiteSpace(this string stringToParse)
+        {
+            return Whitespace.Replace(stringToParse, "");
+        }
+
+        public static string ReplaceWhiteSpaceWithUnderscore(this string stringToParse)
+        {
+            return Whitespace.Replace(stringToParse, "_");
         }
     }
 }
