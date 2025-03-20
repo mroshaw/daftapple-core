@@ -32,6 +32,16 @@ namespace DaftAppleGames.Extensions
             return EnsureComponent(existingComponent.gameObject, typeof(T)) as T;
         }
 
+        public static bool HasComponent<T>(this GameObject gameObject) where T : Component
+        {
+            return gameObject.GetComponent<T>() != null;
+        }
+
+        public static bool HasComponent<T>(this Component component) where T : Component
+        {
+            return HasComponent<T>(component.gameObject);
+        }
+
         public static GameObject FindChildGameObject(this GameObject fromGameObject, string childName, bool exact = true)
         {
             Transform[] transforms = fromGameObject.transform.GetComponentsInChildren<Transform>(true);

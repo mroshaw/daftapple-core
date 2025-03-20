@@ -142,6 +142,12 @@ namespace DaftAppleGames.Editor.Utils
             foreach (GameObject go in objectsWithMissingScriptsInCurrentScene)
             {
                 GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+                Debug.Log($"Deleted missing script from: {go.name}");
+                if (go.hideFlags.HasFlag(HideFlags.HideInHierarchy))
+                {
+                    Debug.Log("Revealing hidden GameObject " + go.name, go);
+                    go.hideFlags &= ~HideFlags.HideInHierarchy;
+                }
             }
         }
 

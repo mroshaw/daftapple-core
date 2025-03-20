@@ -1,3 +1,6 @@
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,6 +11,9 @@ namespace DaftAppleGames.Extensions
         public static void AlignObject(this Terrain terrain, GameObject targetGameObject, bool alignPosition, bool alignRotation,
             bool alignX, bool alignY, bool alignZ)
         {
+#if UNITY_EDITOR
+            Undo.RegisterCompleteObjectUndo(targetGameObject, $"Align {targetGameObject.name} to Terrain");
+#endif
             if (alignPosition)
             {
                 float terrainHeight = GetTerrainHeightAtTransform(terrain, targetGameObject.transform);
@@ -35,7 +41,9 @@ namespace DaftAppleGames.Extensions
                 }
                 targetGameObject.transform.rotation = newRotation;
             }
-
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(targetGameObject);
+#endif
         }
 
         private static Quaternion GetTerrainSlopeAtTransform(Terrain terrain, Transform targetTransform)

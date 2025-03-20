@@ -8,11 +8,10 @@ namespace DaftAppleGames.Gameplay
     {
         #region Class Variables
 
-        [Header("Trigger Settings")]
+        [Header("Collider Settings")]
         [Tooltip("Trigger will only fire if the collider has any one of these tags.")] public string[] triggerTags;
-
         [Tooltip("Trigger will only fire if the collider is on any one of these layers.")] public LayerMask triggerLayers;
-
+        [Tooltip("Colliders marked as triggers will be ignored.")] public bool ignoreTriggers;
         [Header("Events")]
         public UnityEvent<Collider> triggerEnterEvent;
 
@@ -37,6 +36,11 @@ namespace DaftAppleGames.Gameplay
 
         private void OnTriggerEnter(Collider other)
         {
+            if (other.isTrigger && ignoreTriggers)
+            {
+                return;
+            }
+
             if (CollisionIsValid(other))
             {
                 TriggerEnter(other);
@@ -46,6 +50,11 @@ namespace DaftAppleGames.Gameplay
 
         private void OnTriggerExit(Collider other)
         {
+            if (other.isTrigger && ignoreTriggers)
+            {
+                return;
+            }
+
             if (CollisionIsValid(other))
             {
                 TriggerExit(other);

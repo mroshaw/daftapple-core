@@ -217,6 +217,7 @@ namespace DaftAppleGames.Lighting
             }
         }
 
+#if UNITY_EDITOR
         [CustomEditor(typeof(OnDemandShadowMapUpdate))]
         public class ShadowMapRefreshEditor : Editor
         {
@@ -337,6 +338,7 @@ namespace DaftAppleGames.Lighting
                 EditorGUILayout.EndHorizontal();
             }
         }
+#endif
     }
 
     public enum ShadowMapToRefresh
