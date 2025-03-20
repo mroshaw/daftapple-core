@@ -6,8 +6,6 @@ using UnityEngine.UIElements;
 
 namespace DaftAppleGames.Editor
 {
-    public enum LogLevel { Info, Warning, Error }
-
     // Use this as a basis for all Package Initializer windows
     public abstract class PackageInitializerEditorWindow : EditorWindow
     {

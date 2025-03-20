@@ -8,15 +8,15 @@ using Object = UnityEngine.Object;
 namespace DaftAppleGames.Editor.Package
 {
     [Serializable]
-    public class PackageItem
+    internal class PackageItem
     {
-        public Object itemAsset;
-        public string itemDestinationPath;
-        public bool overwriteExisting = true;
+        internal Object itemAsset;
+        internal string itemDestinationPath;
+        internal bool overwriteExisting = true;
 
-        public string Name => itemAsset.name;
+        internal string Name => itemAsset.name;
 
-        public bool Install(string basePath, Action<LogLevel, string> logDelegate)
+        internal bool Install(string basePath, Action<LogLevel, string> logDelegate)
         {
             if (!itemAsset)
             {

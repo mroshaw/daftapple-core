@@ -11,17 +11,6 @@
     -unity-font-style: bold;
 }
 
-.HeadingText {
-    font-size: 18px;
-    color: rgb(204, 255, 4);
-    -unity-text-align: upper-center;
-    -unity-font-style: bold;
-    padding-top: 6px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    padding-left: 6px;
-}
-
 .Field {
     padding-top: 3px;
     padding-right: 3px;
@@ -98,6 +87,17 @@
     -unity-font-style: bold;
     white-space: pre-wrap;
     -unity-text-align: upper-center;
-    font-size: 22px;
+    font-size: 14px;
     color: rgb(128, 124, 255);
+}
+
+.HeadingText {
+    font-size: 18px;
+    color: rgb(204, 255, 4);
+    -unity-text-align: upper-center;
+    -unity-font-style: bold;
+    padding-top: 6px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    padding-left: 6px;
 }

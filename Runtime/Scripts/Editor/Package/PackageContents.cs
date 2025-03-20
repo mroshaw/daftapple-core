@@ -17,7 +17,7 @@ namespace DaftAppleGames.Editor.Package
     [CreateAssetMenu(fileName = "PackageContents", menuName = "Daft Apple Games/Package/Package Contents", order = 1)]
     public class PackageContents : ScriptableObject
     {
-        [BoxGroup("Package Contents")] public PackageItem[] packageItems;
+        [BoxGroup("Package Contents")] internal PackageItem[] packageItems;
 
         [SerializeField] private bool isInstalled = false;
 
@@ -25,7 +25,7 @@ namespace DaftAppleGames.Editor.Package
 
         public UnityEvent<bool> onInstallStateChanged;
 
-        public bool Install(Action<LogLevel, string> logDelegate, string baseInstallLocation)
+        internal bool Install(Action<LogLevel, string> logDelegate, string baseInstallLocation)
         {
             bool installedState = true;
 
@@ -45,21 +45,21 @@ namespace DaftAppleGames.Editor.Package
             return installedState;
         }
 
-        public void UnsetInstallComplete()
+        internal void UnsetInstallComplete()
         {
             isInstalled = false;
             onInstallStateChanged.Invoke(isInstalled);
             UpdateAssetFile();
         }
 
-        public void SetInstallState(bool state)
+        internal void SetInstallState(bool state)
         {
             isInstalled = state;
             onInstallStateChanged.Invoke(state);
             UpdateAssetFile();
         }
 
-        public bool IsAlreadyInstalled()
+        internal bool IsAlreadyInstalled()
         {
             return isInstalled;
         }
@@ -70,7 +70,7 @@ namespace DaftAppleGames.Editor.Package
             AssetDatabase.SaveAssetIfDirty(this);
         }
 
-        public void SetWelcomeWindowDisplayed(bool displayed)
+        internal void SetWelcomeWindowDisplayed(bool displayed)
         {
             welcomeWindowDisplayed = displayed;
             UpdateAssetFile();
