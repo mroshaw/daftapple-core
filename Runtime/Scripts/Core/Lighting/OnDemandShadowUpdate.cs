@@ -1,3 +1,4 @@
+#if DAG_HDRP
 #if ODIN_INSPECTOR
 #endif
 
@@ -354,3 +355,4 @@ namespace DaftAppleGames.Lighting
         Seconds
     }
 }
+#endif
