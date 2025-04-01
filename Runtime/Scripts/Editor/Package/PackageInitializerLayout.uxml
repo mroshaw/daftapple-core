@@ -1,5 +1,5 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/daftapple-core/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=2247bb3b8f94bad4cad9443342133477&amp;type=3#EditorWindowStyles" />
+    <Style src="../EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=2247bb3b8f94bad4cad9443342133477&amp;type=3#EditorWindowStyles" />
     <engine:VisualElement name="EditorWindow" class="EditorWindow">
         <engine:Label name="IntroText" binding-path="introText" class="IntroText" />
         <engine:TextField label="Install Folder:" name="InstallLocation" select-line-by-triple-click="false" value="Assets\" binding-path="baseInstallLocation" class="Field" />
