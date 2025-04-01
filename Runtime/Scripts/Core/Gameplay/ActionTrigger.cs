@@ -1,6 +1,11 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#else
+using DaftAppleGames.Attributes;
+#endif
 
 namespace DaftAppleGames.Gameplay
 {
@@ -8,14 +13,11 @@ namespace DaftAppleGames.Gameplay
     {
         #region Class Variables
 
-        [Header("Collider Settings")]
-        [Tooltip("Trigger will only fire if the collider has any one of these tags.")] public string[] triggerTags;
-        [Tooltip("Trigger will only fire if the collider is on any one of these layers.")] public LayerMask triggerLayers;
-        [Tooltip("Colliders marked as triggers will be ignored.")] public bool ignoreTriggers;
-        [Header("Events")]
-        public UnityEvent<Collider> triggerEnterEvent;
-
-        public UnityEvent<Collider> triggerExitEvent;
+        [BoxGroup("Collider Settings")] [Tooltip("Trigger will only fire if the collider has any one of these tags.")] [SerializeField] private string[] triggerTags;
+        [Tooltip("Trigger will only fire if the collider is on any one of these layers.")] [SerializeField] protected LayerMask triggerLayerMask;
+        [Tooltip("Colliders marked as triggers will be ignored.")] [SerializeField] protected bool ignoreTriggers;
+        [BoxGroup("Events")] public UnityEvent<Collider> triggerEnterEvent;
+        [BoxGroup("Events")] public UnityEvent<Collider> triggerExitEvent;
 
         #endregion
 
@@ -68,7 +70,7 @@ namespace DaftAppleGames.Gameplay
             if (triggerTags.Length == 0 || triggerTags.Contains(other.tag))
             {
                 // Compare Layers
-                if (triggerLayers == 0 || ((1 << other.gameObject.layer) & triggerLayers) != 0)
+                if (triggerLayerMask == 0 || ((1 << other.gameObject.layer) & triggerLayerMask) != 0)
                 {
                     return true;
                 }
@@ -79,5 +81,15 @@ namespace DaftAppleGames.Gameplay
 
         public abstract void TriggerEnter(Collider other);
         public abstract void TriggerExit(Collider other);
+
+        #region Unity Editor methods
+#if UNITY_EDITOR
+        public virtual void ConfigureInEditor(LayerMask newTriggerLayerMask, string[] newTriggerTags)
+        {
+            triggerLayerMask = newTriggerLayerMask;
+            triggerTags = newTriggerTags;
+        }
+#endif
+        #endregion
     }
 }

@@ -23,12 +23,12 @@ namespace DaftAppleGames.Editor
         protected virtual string WelcomeLogText => "Welcome to Base Editor!";
 
         private Button _clearLogButton;
-        private TextField _logTextField;
+        private ScrollView _logTextScrollView;
         private SerializedObject _serializedObject;
         private VisualElement _customEditorContainer;
 
         // Logging instance
-        protected readonly EditorLog log = new();
+        protected readonly EditorLog log = new(true, true);
 
         public virtual void CreateGUI()
         {
@@ -42,16 +42,23 @@ namespace DaftAppleGames.Editor
             _customEditorContainer = rootVisualElement.Q<VisualElement>("CustomEditorContainer");
             _customEditorContainer.Add(customEditorRoot);
 
-            _logTextField = rootVisualElement.Q<TextField>("LogText");
-            if (_logTextField != null)
+            TextField logTextField = rootVisualElement.Q<TextField>("LogText");
+            if (logTextField != null)
             {
-                _logTextField.RegisterValueChangedCallback(evt => ScrollLogToBottom());
+                logTextField.RegisterValueChangedCallback(evt => ScrollLogToBottom());
+                _logTextScrollView = logTextField.Q<ScrollView>();
             }
 
-            _clearLogButton = rootVisualElement.Q<Button>("ClearLogButton");
-            if (_clearLogButton != null)
+            Toggle detailedLoggingToggle = rootVisualElement.Q<Toggle>("DetailedLoggingToggle");
+            if (detailedLoggingToggle != null)
             {
-                _clearLogButton.clicked += ClearLog;
+                detailedLoggingToggle.RegisterValueChangedCallback(evt => DetailedLoggingToggled(evt.newValue));
+            }
+
+            Button clearLogButton = rootVisualElement.Q<Button>("ClearLogButton");
+            if (clearLogButton != null)
+            {
+                clearLogButton.clicked += ClearLog;
             }
 
             // Bind to UI
@@ -65,10 +72,15 @@ namespace DaftAppleGames.Editor
             log.Log(LogLevel.Info, WelcomeLogText);
         }
 
+        private void DetailedLoggingToggled(bool value)
+        {
+            log.DetailedLogging = value;
+        }
 
         private void LogChangedHandler(EditorLog changedLog)
         {
             logText = changedLog.GetLogAsString();
+            ScrollLogToBottom();
         }
 
         private void ClearLog()
@@ -78,14 +90,10 @@ namespace DaftAppleGames.Editor
 
         private void ScrollLogToBottom()
         {
-            if (_logTextField != null)
+            if (_logTextScrollView != null)
             {
-                // Get the internal ScrollView inside the TextField
-                var scrollView = _logTextField.Q<ScrollView>();
-                if (scrollView != null)
-                {
-                    scrollView.scrollOffset = new Vector2(0, float.MaxValue); // Force scroll to bottom
-                }
+                _logTextScrollView.scrollOffset = _logTextScrollView.contentContainer.layout.max - _logTextScrollView.contentViewport.layout.size;
+                // _logTextScrollView.scrollOffset = new Vector2(0, float.MaxValue); // Force scroll to bottom
             }
         }
     }

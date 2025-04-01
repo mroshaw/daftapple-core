@@ -101,3 +101,22 @@
     padding-bottom: 6px;
     padding-left: 6px;
 }
+
+.CustomContentContainer {
+}
+
+.CustomContentContainer {
+}
+
+.SkinnyButton {
+    font-size: 8px;
+    padding-top: 2px;
+    padding-right: 4px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+    margin-top: 0;
+    margin-right: 10px;
+    margin-bottom: 0;
+    margin-left: 10px;
+    -unity-font-style: bold;
+}

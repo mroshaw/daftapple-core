@@ -1,12 +1,16 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/building-tools/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=b92b529d400a4f84db355c6f295a3efa&amp;type=3#EditorWindowStyles" />
+    <Style src="project://database/Assets/daftapple-core/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=b92b529d400a4f84db355c6f295a3efa&amp;type=3#EditorWindowStyles" />
     <engine:VisualElement name="EditorWindow" class="EditorWindow">
         <engine:Label name="TitleLabel" binding-path="titleText" text="Title Text" class="HeadingText" />
         <engine:Label name="IntroText" binding-path="introText" text="Intro Test" class="IntroText" />
-        <engine:VisualElement name="CustomEditorContainer" style="flex-grow: 1;" />
+        <engine:VisualElement name="CustomEditorContainer" class="CustomContentContainer" style="flex-shrink: 0;" />
         <engine:Label text="Log:" class="Label" />
-        <engine:TextField name="LogText" binding-path="logText" multiline="true" readonly="true" vertical-scroller-visibility="AlwaysVisible" class="LogText" />
-        <engine:Toggle label="Detailed logging:" name="LogToggle" binding-path="loggingEnabled" class="Label" />
-        <engine:Button text="Clear Log" name="ClearLogButton" class="Button" />
+        <engine:VisualElement name="LoggingContainer" style="flex-grow: 1;">
+            <engine:TextField name="LogText" binding-path="logText" multiline="true" readonly="true" vertical-scroller-visibility="AlwaysVisible" class="LogText" style="flex-direction: row; flex-shrink: 0; flex-grow: 1; bottom: 40px; top: 0;" />
+            <engine:VisualElement name="LoggingControlsContainer">
+                <engine:Toggle label="Detailed logs:" name="DetailedLoggingToggle" binding-path="loggingEnabled" class="Label" />
+                <engine:Button text="Clear Log" name="ClearLogButton" class="Button" />
+            </engine:VisualElement>
+        </engine:VisualElement>
     </engine:VisualElement>
 </engine:UXML>

@@ -11,9 +11,11 @@ namespace DaftAppleGames.Editor
         private readonly List<string> _logEntries;
         private readonly bool _logToConsole;
 
+        public bool DetailedLogging { set; private get; }
+
         public readonly UnityEvent<EditorLog> LogChangedEvent = new UnityEvent<EditorLog>();
 
-        public EditorLog(bool logToConsole=true)
+        public EditorLog(bool logToConsole, bool detailedLogging)
         {
             _logEntries = new List<string>();
             _logToConsole = logToConsole;
@@ -24,13 +26,17 @@ namespace DaftAppleGames.Editor
             Log(LogLevel.Info, logEntry);
         }
 
-        public void Log(LogLevel logLevel, string logEntry)
+        public void Log(LogLevel logLevel, string logEntry, bool forceLog = false)
         {
             string fullLogText = "";
 
             switch (logLevel)
             {
                 case LogLevel.Info:
+                    if (!DetailedLogging && !forceLog)
+                    {
+                        return;
+                    }
                     fullLogText = $"Info: {logEntry}";
                     if (_logToConsole)
                     {
@@ -38,6 +44,10 @@ namespace DaftAppleGames.Editor
                     }
                     break;
                 case LogLevel.Warning:
+                    if (!DetailedLogging && !forceLog)
+                    {
+                        return;
+                    }
                     fullLogText = $"Warning: {logEntry}";
                     if (_logToConsole)
                     {

@@ -32,6 +32,20 @@ namespace DaftAppleGames.Extensions
             return EnsureComponent(existingComponent.gameObject, typeof(T)) as T;
         }
 
+        public static T TryGetComponentInChildren<T>(this Component existingComponent, out T component, bool includeInactive) where T : Component
+        {
+            return existingComponent.gameObject.TryGetComponentInChildren<T>(out component, includeInactive);
+        }
+
+        public static T TryGetComponentInChildren<T>(this GameObject gameObject, out T component, bool includeInactive) where T : Component
+        {
+            component = gameObject.GetComponentInChildren<T>(includeInactive);
+            return component;
+        }
+
+        /// <summary>
+        /// Returns true if this GameObject has an instance of the given Component Type
+        /// </summary>
         public static bool HasComponent<T>(this GameObject gameObject) where T : Component
         {
             return gameObject.GetComponent<T>() != null;
@@ -40,6 +54,37 @@ namespace DaftAppleGames.Extensions
         public static bool HasComponent<T>(this Component component) where T : Component
         {
             return HasComponent<T>(component.gameObject);
+        }
+
+        /// <summary>
+        /// Returns true if this GameObject shares a parent with the given GameObject
+        /// </summary>
+        public static bool IsParentedBy(this GameObject thisGameObject, GameObject otherGameObject)
+        {
+            if (!thisGameObject.transform.parent)
+            {
+                return false;
+            }
+
+            return thisGameObject.transform.parent == otherGameObject.transform;
+        }
+
+        /// <summary>
+        /// Returns true if this GameObject shares a parent with any of the given GameObjects
+        /// </summary>
+        public static bool IsParentedByAny(this GameObject thisGameObject, GameObject[] otherGameObjects, out GameObject parentGameObject)
+        {
+            foreach (GameObject otherGameObject in otherGameObjects)
+            {
+                if (IsParentedBy(thisGameObject, otherGameObject))
+                {
+                    parentGameObject = otherGameObject;
+                    return true;
+                }
+            }
+
+            parentGameObject = null;
+            return false;
         }
 
         public static GameObject FindChildGameObject(this GameObject fromGameObject, string childName, bool exact = true)
