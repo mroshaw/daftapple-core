@@ -10,7 +10,15 @@ namespace DaftAppleGames.Editor
     public abstract class PackageInitializerEditorWindow : BaseEditorWindow
     {
         [SerializeField] private PackageContents packageContents;
-        private const string BaseInstallFolder = "DaftAppleGames";
+        private const string BaseInstallFolderName = "DaftAppleGames";
+
+        private string PackageDataRelativeInstallFolder => Path.Combine("Assets", BaseInstallFolderName, "Packages");
+        private string PackageDataAbsoluteInstallFolder => Path.Combine(Application.dataPath, BaseInstallFolderName, "Packages");
+        private string PackageRelativeInstallBaseFolder => Path.Combine("Assets", BaseInstallFolderName);
+        private string PackageAbsoluteInstallBaseFolder => Path.Combine(Application.dataPath, BaseInstallFolderName);
+
+        private string PackageAbsoluteInstallFolder => Path.Combine(PackageAbsoluteInstallBaseFolder, packageContents.packageInstallFolder);
+        private string PackageRelativeInstallFolder => Path.Combine(PackageRelativeInstallBaseFolder, packageContents.packageInstallFolder);
 
         private Button _installButton;
         private Button _unInstallButton;
@@ -19,14 +27,16 @@ namespace DaftAppleGames.Editor
 
         private Toggle _showAtStartupToggle;
 
+        // Show the target folder in bound UI control
         [SerializeField] private string packageFullInstallFolder;
 
-        private PackageContents _installerPackage;
+        private PackageContents _localPackageCopy;
 
         private string _packageInstallFullPath;
 
         public override void CreateGUI()
         {
+            packageFullInstallFolder = PackageRelativeInstallFolder;
             InitInstaller();
 
             base.CreateGUI();
@@ -42,7 +52,7 @@ namespace DaftAppleGames.Editor
             if (_unInstallButton != null)
             {
                 _unInstallButton.clicked += UnInstall;
-                if (!_installerPackage.allowUninstall)
+                if (!packageContents.allowUninstall)
                 {
                     _unInstallButton.visible = false;
                 }
@@ -54,31 +64,27 @@ namespace DaftAppleGames.Editor
                 _reInstallButton.clicked += ReInstall;
             }
 
-            _installerPackage.onInstallStateChanged.AddListener(SetButtonState);
+            _localPackageCopy.onInstallStateChanged.AddListener(SetButtonState);
 
-            SetButtonState(_installerPackage.IsAlreadyInstalled());
-            packageFullInstallFolder = Path.Combine(BaseInstallFolder, _installerPackage.packageInstallFolder);
-            _packageInstallFullPath = Path.Combine(Application.dataPath, packageFullInstallFolder);
+            SetButtonState(_localPackageCopy.IsAlreadyInstalled());
         }
 
         private void InitInstaller()
         {
             // Create the base folder, so we can save some bits and pieces across
-            string baseFolderFullPath = Path.Combine(Application.dataPath, BaseInstallFolder);
-            if (!Directory.Exists(baseFolderFullPath))
+            if (!Directory.Exists(PackageAbsoluteInstallBaseFolder))
             {
-                Directory.CreateDirectory(baseFolderFullPath);
+                AssetDatabase.CreateFolder("Assets", BaseInstallFolderName);
             }
 
             // Create a packages subfolder for copies of the package content scriptable objects
-            string packagesFolderFullPath = Path.Combine(baseFolderFullPath, "Packages");
-            if (!Directory.Exists(packagesFolderFullPath))
+            if (!Directory.Exists(PackageDataAbsoluteInstallFolder))
             {
-                Directory.CreateDirectory(packagesFolderFullPath);
+                AssetDatabase.CreateFolder(PackageRelativeInstallBaseFolder, "Packages");
             }
 
             // If the copy of the package already exists, use that from now on
-            _installerPackage = packageContents.GetLocalCopy(packagesFolderFullPath);
+            _localPackageCopy = packageContents.GetLocalCopy(PackageDataAbsoluteInstallFolder, PackageDataRelativeInstallFolder);
         }
 
         private void Install()
@@ -88,19 +94,19 @@ namespace DaftAppleGames.Editor
 
         private void Install(bool force)
         {
-            if (!force && _installerPackage.IsAlreadyInstalled())
+            if (!force && _localPackageCopy.IsAlreadyInstalled())
             {
                 log.Log(LogLevel.Error, "Already installed!");
                 return;
             }
 
             log.Log(LogLevel.Info, "Installing... ", true);
-            bool installResult = _installerPackage.Install(packageFullInstallFolder, log);
+            bool installResult = packageContents.Install(PackageAbsoluteInstallBaseFolder, PackageRelativeInstallBaseFolder, log);
             if (installResult)
             {
-                PostInstallation(_installerPackage, log);
+                PostInstallation(packageContents, log);
                 log.Log(LogLevel.Info, "Install Complete!", true);
-                _installerPackage.SetInstallState(true);
+                _localPackageCopy.SetInstallState(true);
             }
             else
             {
@@ -110,20 +116,20 @@ namespace DaftAppleGames.Editor
 
         private void UnInstall()
         {
-            if (!_installerPackage.IsAlreadyInstalled())
+            if (!_localPackageCopy.IsAlreadyInstalled())
             {
                 log.Log(LogLevel.Error, $"Package is not installed!!");
             }
 
             log.Log(LogLevel.Info, $"Uninstalling...", true);
-            PostUnInstallation(_installerPackage, log);
+            PostUnInstallation(packageContents, log);
             log.Log(LogLevel.Info, $"Uninstall Complete!", true);
-            _installerPackage.SetInstallState(false);
+            _localPackageCopy.SetInstallState(false);
         }
 
         private void ReInstall()
         {
-            if (!_installerPackage.IsAlreadyInstalled())
+            if (!_localPackageCopy.IsAlreadyInstalled())
             {
                 log.Log(LogLevel.Error, $"Package is not installed!!");
             }

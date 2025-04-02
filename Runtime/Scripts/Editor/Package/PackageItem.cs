@@ -10,13 +10,13 @@ namespace DaftAppleGames.Editor.Package
     [Serializable]
     internal class PackageItem
     {
-        internal Object itemAsset;
-        internal string itemDestinationPath;
-        internal bool overwriteExisting = true;
+        [SerializeField] private Object itemAsset;
+        [SerializeField] internal string destinationFolder;
+        [SerializeField] internal bool overwriteExisting = true;
 
         internal string Name => itemAsset.name;
 
-        internal bool Install(string basePath, EditorLog log)
+        internal bool Install(string absoluteInstallPath, string relativeInstallPath, EditorLog log)
         {
             if (!itemAsset)
             {
@@ -24,26 +24,20 @@ namespace DaftAppleGames.Editor.Package
                 return false;
             }
 
+            string absoluteDestinationFolderPath = Path.Combine(absoluteInstallPath, destinationFolder);
+            if (!Directory.Exists(absoluteDestinationFolderPath))
+            {
+                log.Log(LogLevel.Info, $"Creating folder {absoluteDestinationFolderPath}...");
+                AssetDatabase.CreateFolder(relativeInstallPath, destinationFolder);
+            }
+
             // Check to see if the item already exists
             string originalAssetFullPath = AssetDatabase.GetAssetPath(itemAsset);
             string assetFileName = Path.GetFileName(originalAssetFullPath);
-            string fullDestinationFolderPath = Path.Combine(basePath, itemDestinationPath);
-            string fullDestinationFilePath = Path.Combine(fullDestinationFolderPath, assetFileName);
 
-            bool fileAlreadyExists = File.Exists(fullDestinationFilePath);
+            string absoluteDestinationFilePath = Path.Combine(absoluteDestinationFolderPath, assetFileName);
 
-            // Check destination path exists
-            if (!Directory.Exists(basePath))
-            {
-                log.Log(LogLevel.Error, $"The destination base path for the package does not exit: {basePath}");
-                return false;
-            }
-
-            if (!Directory.Exists(fullDestinationFolderPath))
-            {
-                // Try to create the folder
-                Directory.CreateDirectory(fullDestinationFolderPath);
-            }
+            bool fileAlreadyExists = File.Exists(absoluteDestinationFilePath);
 
             if (fileAlreadyExists && !overwriteExisting)
             {
@@ -51,18 +45,20 @@ namespace DaftAppleGames.Editor.Package
                 return true;
             }
 
+            string relativeDestinationFilePath = Path.Combine(relativeInstallPath, destinationFolder, assetFileName);
+
             // If this is a prefab, instantiate an instance and save it as an asset to the target location
             if (PrefabUtility.IsPartOfPrefabAsset(itemAsset))
             {
                 GameObject prefabInstance = PrefabUtility.InstantiatePrefab(itemAsset) as GameObject;
-                PrefabUtility.SaveAsPrefabAsset(prefabInstance, fullDestinationFilePath);
+                PrefabUtility.SaveAsPrefabAsset(prefabInstance, relativeDestinationFilePath);
                 log.Log(LogLevel.Info, "Prefab instance created at: " + originalAssetFullPath);
                 Object.DestroyImmediate(prefabInstance);
                 return true;
             }
 
             // Save a copy to the destination
-            AssetDatabase.CopyAsset(originalAssetFullPath, fullDestinationFilePath);
+            AssetDatabase.CopyAsset(originalAssetFullPath, relativeDestinationFilePath);
             return true;
         }
     }

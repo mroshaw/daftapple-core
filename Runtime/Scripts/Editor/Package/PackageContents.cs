@@ -27,63 +27,67 @@ namespace DaftAppleGames.Editor.Package
 
         private string PackageFileName => name + ".asset";
 
+        /// <summary>
+        /// Given a base path return the specific package file and filename
+        /// </summary>
+        private string GetPackageDataFilePath(string baseInstallFolderPath)
+        {
+            return Path.Combine(baseInstallFolderPath, PackageFileName);
+        }
+
         private bool LocalCopyExists(string fullFolderPath)
         {
-            string fullPath = Path.Combine(fullFolderPath, PackageFileName);
-            return File.Exists(fullPath);
+            return File.Exists(GetPackageDataFilePath(fullFolderPath));
         }
 
         /// <summary>
         /// Retrieves a local copy at the path, if it exists, or creates and returns a new copy
         /// </summary>
-        internal PackageContents GetLocalCopy(string fullFolderPath)
+        internal PackageContents GetLocalCopy(string absoluteFolderPath, string relativeFolderPath)
         {
-            return LocalCopyExists(fullFolderPath) ? LoadLocalCopy(fullFolderPath) : SaveALocalCopy(fullFolderPath);
+            return LocalCopyExists(absoluteFolderPath) ? LoadLocalCopy(relativeFolderPath) : SaveALocalCopy(absoluteFolderPath, relativeFolderPath);
         }
 
-        private PackageContents LoadLocalCopy(string fullFolderPath)
+        private PackageContents LoadLocalCopy(string relativeFolderPath)
         {
-            string fullPath = Path.Combine(fullFolderPath, PackageFileName);
-            string relativePath = "Assets" + fullPath.Substring(Application.dataPath.Length);
+            string relativePath = GetPackageDataFilePath(relativeFolderPath);
             PackageContents newPackageContents = AssetDatabase.LoadAssetAtPath<PackageContents>(relativePath);
             return newPackageContents;
         }
 
-        private PackageContents SaveALocalCopy(string fullFolderPath)
+        private PackageContents SaveALocalCopy(string absoluteFolderPath, string relativeFolderPath)
         {
-            if (string.IsNullOrEmpty(fullFolderPath) || !Directory.Exists(fullFolderPath))
+            if (string.IsNullOrEmpty(absoluteFolderPath) || string.IsNullOrEmpty(relativeFolderPath) || !Directory.Exists(absoluteFolderPath))
             {
                 return this;
             }
 
-            string fullPath = Path.Combine(fullFolderPath, PackageFileName);
-            string relativePath = "Assets" + fullPath.Substring(Application.dataPath.Length);
+            string relativeFilePath = GetPackageDataFilePath(relativeFolderPath);
 
             PackageContents newPackageContents = Instantiate(this);
-            AssetDatabase.CreateAsset(newPackageContents, relativePath);
+            AssetDatabase.CreateAsset(newPackageContents, relativeFilePath);
             return newPackageContents;
         }
 
         /// <summary>
         /// Installs the package
         /// </summary>
-        internal bool Install(string fullFolderPath, EditorLog log)
+        internal bool Install(string absoluteFolderPath, string relativeFolderPath, EditorLog log)
         {
             bool installedState = true;
 
-            string packageFolderPath = Path.Combine(fullFolderPath, packageInstallFolder);
 
             // Create destination base folder
-            if (!Directory.Exists(packageFolderPath))
+            if (!Directory.Exists(absoluteFolderPath))
             {
-                log.Log(LogLevel.Info, $"Directory does not exist: {packageFolderPath}. Creating...");
-                Directory.CreateDirectory(packageFolderPath);
+                log.Log(LogLevel.Info, $"Directory does not exist. Creating folder {absoluteFolderPath}...");
+                AssetDatabase.CreateFolder(relativeFolderPath, packageInstallFolder);
             }
 
             foreach (PackageItem packageItem in packageItems)
             {
                 log.Log(LogLevel.Info, $"Processing item: {packageItem.Name}...");
-                installedState = installedState && packageItem.Install(packageFolderPath, log);
+                installedState = installedState && packageItem.Install(absoluteFolderPath, relativeFolderPath, log);
             }
 
             return installedState;
