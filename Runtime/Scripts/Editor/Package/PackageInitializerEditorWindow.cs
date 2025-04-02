@@ -101,10 +101,10 @@ namespace DaftAppleGames.Editor
             }
 
             log.Log(LogLevel.Info, "Installing... ", true);
-            bool installResult = packageContents.Install(PackageAbsoluteInstallBaseFolder, PackageRelativeInstallBaseFolder, log);
+            bool installResult = _localPackageCopy.Install(PackageAbsoluteInstallBaseFolder, PackageRelativeInstallBaseFolder, log);
             if (installResult)
             {
-                PostInstallation(packageContents, log);
+                PostInstallation(_localPackageCopy, log);
                 log.Log(LogLevel.Info, "Install Complete!", true);
                 _localPackageCopy.SetInstallState(true);
             }
@@ -112,6 +112,8 @@ namespace DaftAppleGames.Editor
             {
                 log.Log(LogLevel.Error, "Install Failed! Check logs!", true);
             }
+
+            CustomEditorTools.SaveChangesToAsset(_localPackageCopy);
         }
 
         private void UnInstall()
@@ -122,7 +124,7 @@ namespace DaftAppleGames.Editor
             }
 
             log.Log(LogLevel.Info, $"Uninstalling...", true);
-            PostUnInstallation(packageContents, log);
+            PostUnInstallation(_localPackageCopy, log);
             log.Log(LogLevel.Info, $"Uninstall Complete!", true);
             _localPackageCopy.SetInstallState(false);
         }

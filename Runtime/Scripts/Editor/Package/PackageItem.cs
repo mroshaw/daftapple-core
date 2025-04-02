@@ -3,20 +3,23 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
 namespace DaftAppleGames.Editor.Package
 {
-    [Serializable]
-    internal class PackageItem
+    [Serializable] public class PackageItem
     {
         [SerializeField] private Object itemAsset;
+        [SerializeField] internal string itemName;
         [SerializeField] internal string destinationFolder;
         [SerializeField] internal bool overwriteExisting = true;
-
+        [SerializeField] private bool isInstalled;
+        [SerializeField] private Object installedItemCopy;
         internal string Name => itemAsset.name;
+        internal Object ItemAsset => installedItemCopy;
 
-        internal bool Install(string absoluteInstallPath, string relativeInstallPath, EditorLog log)
+        internal bool Install(string absoluteInstallPath, string relativeInstallPath, EditorLog log, Action itemInstalledAction = null)
         {
             if (!itemAsset)
             {
@@ -39,10 +42,10 @@ namespace DaftAppleGames.Editor.Package
 
             bool fileAlreadyExists = File.Exists(absoluteDestinationFilePath);
 
-            if (fileAlreadyExists && !overwriteExisting)
+            bool ingoreFile = fileAlreadyExists && !overwriteExisting;
+            if (ingoreFile)
             {
                 log.Log(LogLevel.Info, $"File already exists and overwrite is false. Skipping item: {itemAsset.name}");
-                return true;
             }
 
             string relativeDestinationFilePath = Path.Combine(relativeInstallPath, destinationFolder, assetFileName);
@@ -50,15 +53,30 @@ namespace DaftAppleGames.Editor.Package
             // If this is a prefab, instantiate an instance and save it as an asset to the target location
             if (PrefabUtility.IsPartOfPrefabAsset(itemAsset))
             {
-                GameObject prefabInstance = PrefabUtility.InstantiatePrefab(itemAsset) as GameObject;
-                PrefabUtility.SaveAsPrefabAsset(prefabInstance, relativeDestinationFilePath);
-                log.Log(LogLevel.Info, "Prefab instance created at: " + originalAssetFullPath);
-                Object.DestroyImmediate(prefabInstance);
+                if (!ingoreFile)
+                {
+                    GameObject prefabInstance = PrefabUtility.InstantiatePrefab(itemAsset) as GameObject;
+                    PrefabUtility.SaveAsPrefabAsset(prefabInstance, relativeDestinationFilePath);
+                    log.Log(LogLevel.Info, "Prefab instance created at: " + originalAssetFullPath);
+                    Object.DestroyImmediate(prefabInstance);
+                }
+
+                installedItemCopy = AssetDatabase.LoadAssetAtPath(relativeDestinationFilePath, itemAsset.GetType());
+                isInstalled = true;
+
+                itemInstalledAction?.Invoke();
+
                 return true;
             }
 
             // Save a copy to the destination
-            AssetDatabase.CopyAsset(originalAssetFullPath, relativeDestinationFilePath);
+            if (!ingoreFile)
+            {
+                AssetDatabase.CopyAsset(originalAssetFullPath, relativeDestinationFilePath);
+            }
+
+            installedItemCopy = AssetDatabase.LoadAssetAtPath(relativeDestinationFilePath, itemAsset.GetType());
+            isInstalled = true;
             return true;
         }
     }

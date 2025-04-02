@@ -1,5 +1,6 @@
 using System.IO;
 using System.Net;
+using Codice.Client.Commands.WkTree;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,22 +18,41 @@ namespace DaftAppleGames.Editor.Package
     [CreateAssetMenu(fileName = "PackageContents", menuName = "Daft Apple Games/Package/Package Contents", order = 1)]
     public class PackageContents : ScriptableObject
     {
+        [BoxGroup("Settings")] public string packageName;
         [BoxGroup("Settings")] public string packageInstallFolder;
         [BoxGroup("Settings")] public bool allowUninstall;
+
         [BoxGroup("Package State")] [SerializeField] private bool isInstalled;
         [BoxGroup("Package Contents")] [SerializeField] private PackageItem[] packageItems;
 
         public UnityEvent<bool> onInstallStateChanged;
 
+        public bool GetPackageObjectByName<T>(string itemName, out T assetObject)
+        {
+            foreach (PackageItem packageItem in packageItems)
+            {
+                if (packageItem.itemName.Equals(itemName))
+                {
+                    if (packageItem.ItemAsset is T asset)
+                    {
+                        assetObject = asset;
+                        return true;
+                    }
+                }
+            }
 
-        private string PackageFileName => name + ".asset";
+            assetObject = default;
+            return false;
+        }
+
+        private string PackageCopyFileName => packageName + ".asset";
 
         /// <summary>
         /// Given a base path return the specific package file and filename
         /// </summary>
         private string GetPackageDataFilePath(string baseInstallFolderPath)
         {
-            return Path.Combine(baseInstallFolderPath, PackageFileName);
+            return Path.Combine(baseInstallFolderPath, PackageCopyFileName);
         }
 
         private bool LocalCopyExists(string fullFolderPath)
@@ -66,7 +86,8 @@ namespace DaftAppleGames.Editor.Package
 
             PackageContents newPackageContents = Instantiate(this);
             AssetDatabase.CreateAsset(newPackageContents, relativeFilePath);
-            return newPackageContents;
+            CustomEditorTools.SaveChangesToAsset(newPackageContents);
+            return LoadLocalCopy(relativeFolderPath);
         }
 
         /// <summary>
@@ -75,7 +96,6 @@ namespace DaftAppleGames.Editor.Package
         internal bool Install(string absoluteFolderPath, string relativeFolderPath, EditorLog log)
         {
             bool installedState = true;
-
 
             // Create destination base folder
             if (!Directory.Exists(absoluteFolderPath))
@@ -97,18 +117,11 @@ namespace DaftAppleGames.Editor.Package
         {
             isInstalled = state;
             onInstallStateChanged.Invoke(state);
-            UpdateAssetFile();
         }
 
         internal bool IsAlreadyInstalled()
         {
             return isInstalled;
-        }
-
-        private void UpdateAssetFile()
-        {
-            EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssetIfDirty(this);
         }
     }
 }

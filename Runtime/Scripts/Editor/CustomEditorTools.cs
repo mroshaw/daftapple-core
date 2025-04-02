@@ -161,6 +161,13 @@ namespace DaftAppleGames.Editor
             Debug.LogError("No empty slots available for new layers.");
         }
 
+        public static void SaveChangesToAsset(Object asset)
+        {
+            EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
         #endregion
     }
 }
