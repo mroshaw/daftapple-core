@@ -16,11 +16,11 @@ namespace DaftAppleGames.Editor.Package
 
         internal string Name => itemAsset.name;
 
-        internal bool Install(string basePath, Action<LogLevel, string> logDelegate)
+        internal bool Install(string basePath, EditorLog log)
         {
             if (!itemAsset)
             {
-                logDelegate(LogLevel.Error, "Item asset is missing. Aborting.");
+                log.Log(LogLevel.Error, "Item asset is missing. Aborting.");
                 return false;
             }
 
@@ -35,7 +35,7 @@ namespace DaftAppleGames.Editor.Package
             // Check destination path exists
             if (!Directory.Exists(basePath))
             {
-                logDelegate(LogLevel.Error, $"The destination base path for the package does not exit: {basePath}");
+                log.Log(LogLevel.Error, $"The destination base path for the package does not exit: {basePath}");
                 return false;
             }
 
@@ -47,7 +47,7 @@ namespace DaftAppleGames.Editor.Package
 
             if (fileAlreadyExists && !overwriteExisting)
             {
-                logDelegate(LogLevel.Info, $"File already exists and overwrite is false. Skipping item: {itemAsset.name}");
+                log.Log(LogLevel.Info, $"File already exists and overwrite is false. Skipping item: {itemAsset.name}");
                 return true;
             }
 
@@ -56,7 +56,7 @@ namespace DaftAppleGames.Editor.Package
             {
                 GameObject prefabInstance = PrefabUtility.InstantiatePrefab(itemAsset) as GameObject;
                 PrefabUtility.SaveAsPrefabAsset(prefabInstance, fullDestinationFilePath);
-                logDelegate(LogLevel.Info, "Prefab instance created at: " + originalAssetFullPath);
+                log.Log(LogLevel.Info, "Prefab instance created at: " + originalAssetFullPath);
                 Object.DestroyImmediate(prefabInstance);
                 return true;
             }

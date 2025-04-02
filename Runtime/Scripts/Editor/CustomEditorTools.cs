@@ -72,7 +72,7 @@ namespace DaftAppleGames.Editor
             }
 
             // Open the TagManager asset
-            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            SerializedObject tagManager = new(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
 
             // Access the Tags property
             SerializedProperty tagsProp = tagManager.FindProperty("tags");
@@ -98,6 +98,26 @@ namespace DaftAppleGames.Editor
         }
 
         /// <summary>
+        /// Changes the name of the given Rendering Layer
+        /// </summary>
+        public static void RenameRenderingLayer(int layerIndex, string newName)
+        {
+            if (string.IsNullOrEmpty(newName))
+            {
+                Debug.LogError("Rendering Layer name cannot be null or empty.");
+                return;
+            }
+
+            SerializedObject tagManager = new(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+
+            // Access the Rendering Layer property
+            SerializedProperty layersProp = tagManager.FindProperty("m_RenderingLayers");
+            SerializedProperty layerSp = layersProp.GetArrayElementAtIndex(layerIndex);
+            layerSp.stringValue = newName;
+            tagManager.ApplyModifiedProperties();
+        }
+
+        /// <summary>
         /// Adds a Layer to the project layer list
         /// </summary>
         public static void AddLayer(string layerName)
@@ -109,7 +129,7 @@ namespace DaftAppleGames.Editor
             }
 
             // Open the TagManager asset
-            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            SerializedObject tagManager = new(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
 
             // Access the Layers property
             SerializedProperty layersProp = tagManager.FindProperty("layers");
@@ -137,8 +157,10 @@ namespace DaftAppleGames.Editor
                     return;
                 }
             }
+
             Debug.LogError("No empty slots available for new layers.");
         }
+
         #endregion
     }
 }

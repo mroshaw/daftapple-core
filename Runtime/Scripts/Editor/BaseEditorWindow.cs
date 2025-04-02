@@ -37,9 +37,12 @@ namespace DaftAppleGames.Editor
             baseVisualTree.CloneTree(rootVisualElement);
 
             // Setup the custom editor content in the container placeholder
-            VisualElement customEditorRoot = customEditorVisualTree.Instantiate();
-            _customEditorContainer = rootVisualElement.Q<VisualElement>("CustomEditorContainer");
-            _customEditorContainer.Add(customEditorRoot);
+            if (customEditorVisualTree)
+            {
+                VisualElement customEditorRoot = customEditorVisualTree.Instantiate();
+                _customEditorContainer = rootVisualElement.Q<VisualElement>("CustomEditorContainer");
+                _customEditorContainer.Add(customEditorRoot);
+            }
 
             TextField logTextField = rootVisualElement.Q<TextField>("LogText");
             if (logTextField != null)
