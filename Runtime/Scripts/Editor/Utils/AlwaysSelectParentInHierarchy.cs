@@ -1,17 +1,18 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.TerrainTools;
 
 namespace DaftAppleGames.Editor.Utils
 {
-
-
-
+    /// <summary>
+    /// This forces the Editor to select the parent game object, rather than the
+    /// LOD mesh game object, when selecting a multi-LOD object in the scene view
+    /// Can be enabled/disabled
+    /// </summary>
     [InitializeOnLoad]
     public class AlwaysSelectParentInHierarchy
     {
-        public static bool IsEnabled = true; // Flag to check if the script functionality is enabled
-        public static bool DebugMessages = true; // Flag to check if debug messages should be displayed
+        private static bool _isEnabled;
+        private static bool _debugMessages;
 
         static AlwaysSelectParentInHierarchy()
         {
@@ -21,7 +22,7 @@ namespace DaftAppleGames.Editor.Utils
 
         static void OnSelectionChanged()
         {
-            if (!IsEnabled)
+            if (!_isEnabled)
                 return;
 
             Log("Selection changed.");
@@ -34,13 +35,14 @@ namespace DaftAppleGames.Editor.Utils
 
             GameObject[] selectedObjects = Selection.gameObjects;
 
-            for (int goIndex=0; goIndex<selectedObjects.Length; goIndex++)
+            for (int goIndex = 0; goIndex < selectedObjects.Length; goIndex++)
             {
                 GameObject currGameObject = selectedObjects[goIndex];
                 if (currGameObject == null)
                 {
                     continue;
                 }
+
                 Transform parentWithLOD = currGameObject.transform;
 
                 while (parentWithLOD != null)
@@ -61,7 +63,6 @@ namespace DaftAppleGames.Editor.Utils
 
                     parentWithLOD = parentWithLOD.parent;
                 }
-
             }
 
             GameObject selectedObject = Selection.activeGameObject;
@@ -70,40 +71,47 @@ namespace DaftAppleGames.Editor.Utils
                 return;
 
             Log("Checking for parent with LOD.");
-
-
         }
 
-        static bool MouseIsOverAnySceneView()
+        /// <summary>
+        /// Check to see if user is selecting something in the scene view
+        /// </summary>
+        private static bool MouseIsOverAnySceneView()
         {
             foreach (SceneView view in SceneView.sceneViews)
             {
-                if ((Object)view == SceneView.mouseOverWindow)
+                if (view == EditorWindow.mouseOverWindow)
+                {
                     return true;
+                }
             }
 
             return false;
         }
 
-        // Helper function to display logs based on the DebugMessages flag
-        static void Log(string message)
+        /// <summary>
+        /// Outputs log if logging enabled
+        /// </summary>
+        private static void Log(string message)
         {
-            if (DebugMessages)
+            if (_debugMessages)
+            {
                 Debug.Log(message);
+            }
         }
 
-        [MenuItem("Tools/Toggle LOD Parent Selection")]
+        [MenuItem("Daft Apple Games/Tools/Toggle LOD Parent Selection")]
         public static void ToggleFunctionality()
         {
-            IsEnabled = !IsEnabled;
-            Log("LOD Parent Selection is " + (IsEnabled ? "enabled" : "disabled"));
+            _isEnabled = !_isEnabled;
+            Log("LOD Parent Selection is " + (_isEnabled ? "enabled" : "disabled"));
         }
 
-        [MenuItem("Tools/Toggle LOD Debug Messages")]
+        [MenuItem("Daft Apple Games/Tools/Toggle LOD Debug")]
         public static void ToggleDebugMessages()
         {
-            DebugMessages = !DebugMessages;
-            Debug.Log("LOD Debug Messages are " + (DebugMessages ? "enabled" : "disabled"));
+            _debugMessages = !_debugMessages;
+            Debug.Log("LOD Debug Messages are " + (_debugMessages ? "enabled" : "disabled"));
         }
     }
 }

@@ -12,23 +12,22 @@ namespace DaftAppleGames.Editor
         [SerializeField] private bool loggingEnabled = true;
 
         // Bound text to display in the Editor
-        [SerializeField] string logText;
-
+        [SerializeField] private string logText;
         [SerializeField] private string titleText;
         [SerializeField] private string introText;
 
-        protected virtual string WindowTitle => "Base Editor";
-        protected virtual string ToolTitle => "Base Editor";
-        protected virtual string IntroText => "Welcome to Base Editor!";
-        protected virtual string WelcomeLogText => "Welcome to Base Editor!";
-
-        private Button _clearLogButton;
-        private ScrollView _logTextScrollView;
-        private SerializedObject _serializedObject;
-        private VisualElement _customEditorContainer;
-
         // Logging instance
         protected readonly EditorLog log = new(true, true);
+
+        private Button _clearLogButton;
+        private VisualElement _customEditorContainer;
+        private ScrollView _logTextScrollView;
+        private SerializedObject _serializedObject;
+
+        // protected virtual string WindowTitle => "";
+        protected virtual string ToolTitle => "";
+        protected virtual string IntroText => "";
+        protected virtual string WelcomeLogText => "";
 
         public virtual void CreateGUI()
         {
@@ -65,7 +64,7 @@ namespace DaftAppleGames.Editor
             _serializedObject = new SerializedObject(this);
             rootVisualElement.Bind(_serializedObject);
 
-            titleText = WindowTitle;
+            titleText = ToolTitle;
             introText = IntroText;
 
             ClearLog();

@@ -1,10 +1,68 @@
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEngine;
+using UnityEngine.Rendering;
 
-namespace DaftAppleGames.Editor.Utils
+namespace DaftAppleGames.Editor
 {
-    public static class EditorUtils
+    /// <summary>
+    /// Static methods for basic Editor stuff
+    /// </summary>
+    public static class CustomEditorTools
     {
+        #region Static properties
+
+        #endregion
+
+        #region Class methods
+
+        /// <summary>
+        /// Sets a script define based on the active render pipeline in the project
+        /// Runs immediately when the editor loads
+        /// </summary>
+        [InitializeOnLoadMethod]
+        public static void SetRenderPipelineDefine()
+        {
+            // Get current scripting define symbols for Standalone
+            string defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone);
+
+            // Check if HDRP is active
+            if (GraphicsSettings.defaultRenderPipeline != null &&
+                GraphicsSettings.defaultRenderPipeline.GetType().Name.Contains("HDRenderPipeline"))
+            {
+                // Add HDRP define if it's not already present
+                if (!defines.Contains("DAG_HDRP"))
+                {
+                    defines += ";DAG_HDRP";
+                }
+            }
+            // Check if URP is active
+            else if (GraphicsSettings.defaultRenderPipeline != null &&
+                     GraphicsSettings.defaultRenderPipeline.GetType().Name.Contains("UniversalRenderPipeline"))
+            {
+                // Add URP define if it's not already present
+                if (!defines.Contains("DAG_URP"))
+                {
+                    defines += ";DAG_URP";
+                }
+            }
+            // Check if Built-In Render Pipeline is active
+            else if (GraphicsSettings.defaultRenderPipeline == null)
+            {
+                // Add Built-In define if it's not already present
+                if (!defines.Contains("DAG_BIRP"))
+                {
+                    defines += ";DAG_BIRP";
+                }
+            }
+
+            // Set the updated define symbols
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, defines);
+        }
+
+        /// <summary>
+        /// Adds a new tag to the project tag list
+        /// </summary>
         public static void AddTag(string tagName)
         {
             if (string.IsNullOrEmpty(tagName))
@@ -39,6 +97,9 @@ namespace DaftAppleGames.Editor.Utils
             Debug.Log($"Added tag \"{tagName}\" successfully.");
         }
 
+        /// <summary>
+        /// Adds a Layer to the project layer list
+        /// </summary>
         public static void AddLayer(string layerName)
         {
             if (string.IsNullOrEmpty(layerName))
@@ -76,8 +137,8 @@ namespace DaftAppleGames.Editor.Utils
                     return;
                 }
             }
-
             Debug.LogError("No empty slots available for new layers.");
         }
+        #endregion
     }
 }

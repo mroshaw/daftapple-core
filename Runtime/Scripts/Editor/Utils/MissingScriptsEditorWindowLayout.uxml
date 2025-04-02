@@ -1,0 +1,11 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/daftapple-core/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=b92b529d400a4f84db355c6f295a3efa&amp;type=3#EditorWindowStyles" />
+    <engine:Button text="Find Missing Scripts in Scenes" name="FindMissingScriptsInSceneButton" class="Button" />
+    <engine:Button text="Delete Missing Scripts in Scenes" name="DeleteMissingScriptsInSceneButton" class="Button" />
+    <engine:Button text="Find Missing Scripts in Assets" name="FindMissingScriptsInAssetsButton" class="Button" />
+    <engine:Button text="Delete Missing Scripts in Assets" name="DeleteMissingScriptsInAssetsButton" class="Button" />
+    <engine:Label text="Scene Game Objects:" name="SceneGameObjectsLabel" class="Label" />
+    <engine:ListView name="SceneGameObjectsListView" binding-path="objectsWithMissingScriptsInScenes" show-border="true" class="ListView" />
+    <engine:Label text="Assets:" name="AssetObjectsLabel" class="Label" />
+    <engine:ListView name="AssetsObjectsListView" binding-path="objectsWithMissingScriptsInAssets" show-border="true" class="ListView" />
+</engine:UXML>
