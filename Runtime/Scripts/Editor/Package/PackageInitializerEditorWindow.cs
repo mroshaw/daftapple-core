@@ -12,13 +12,10 @@ namespace DaftAppleGames.Editor
         [SerializeField] private PackageContents packageContents;
         private const string BaseInstallFolderName = "DaftAppleGames";
 
-        private string PackageDataRelativeInstallFolder => Path.Combine("Assets", BaseInstallFolderName, "Packages");
-        private string PackageDataAbsoluteInstallFolder => Path.Combine(Application.dataPath, BaseInstallFolderName, "Packages");
-        private string PackageRelativeInstallBaseFolder => Path.Combine("Assets", BaseInstallFolderName);
-        private string PackageAbsoluteInstallBaseFolder => Path.Combine(Application.dataPath, BaseInstallFolderName);
-
-        private string PackageAbsoluteInstallFolder => Path.Combine(PackageAbsoluteInstallBaseFolder, packageContents.packageInstallFolder);
-        private string PackageRelativeInstallFolder => Path.Combine(PackageRelativeInstallBaseFolder, packageContents.packageInstallFolder);
+        private string RelativePackageInstallFolder => Path.Combine("Assets", BaseInstallFolderName, "Packages");
+        private string AbsolutePackageInstallFolder => Path.Combine(Application.dataPath, BaseInstallFolderName, "Packages");
+        private string AbsoluteBaseInstallFolder => Path.Combine("Assets", BaseInstallFolderName);
+        private string RelativeBaseInstallFolder => Path.Combine(Application.dataPath, BaseInstallFolderName);
 
         private Button _installButton;
         private Button _unInstallButton;
@@ -27,16 +24,10 @@ namespace DaftAppleGames.Editor
 
         private Toggle _showAtStartupToggle;
 
-        // Show the target folder in bound UI control
-        [SerializeField] private string packageFullInstallFolder;
-
         private PackageContents _localPackageCopy;
-
-        private string _packageInstallFullPath;
 
         public override void CreateGUI()
         {
-            packageFullInstallFolder = PackageRelativeInstallFolder;
             InitInstaller();
 
             base.CreateGUI();
@@ -72,19 +63,24 @@ namespace DaftAppleGames.Editor
         private void InitInstaller()
         {
             // Create the base folder, so we can save some bits and pieces across
-            if (!Directory.Exists(PackageAbsoluteInstallBaseFolder))
+            if (!Directory.Exists(RelativeBaseInstallFolder))
             {
                 AssetDatabase.CreateFolder("Assets", BaseInstallFolderName);
             }
 
             // Create a packages subfolder for copies of the package content scriptable objects
-            if (!Directory.Exists(PackageDataAbsoluteInstallFolder))
+            if (!Directory.Exists(AbsolutePackageInstallFolder))
             {
-                AssetDatabase.CreateFolder(PackageRelativeInstallBaseFolder, "Packages");
+                AssetDatabase.CreateFolder(AbsoluteBaseInstallFolder, "Packages");
+            }
+
+            if (!packageContents)
+            {
+                Debug.LogError("No package contents found for installer to use!");
             }
 
             // If the copy of the package already exists, use that from now on
-            _localPackageCopy = packageContents.GetLocalCopy(PackageDataAbsoluteInstallFolder, PackageDataRelativeInstallFolder);
+            _localPackageCopy = packageContents.GetLocalCopy(AbsolutePackageInstallFolder, RelativePackageInstallFolder);
         }
 
         private void Install()
@@ -101,12 +97,10 @@ namespace DaftAppleGames.Editor
             }
 
             log.Log(LogLevel.Info, "Installing... ", true);
-            bool installResult = _localPackageCopy.Install(PackageAbsoluteInstallBaseFolder, PackageRelativeInstallBaseFolder, log);
+            bool installResult = _localPackageCopy.Install(log);
             if (installResult)
             {
-                PostInstallation(_localPackageCopy, log);
                 log.Log(LogLevel.Info, "Install Complete!", true);
-                _localPackageCopy.SetInstallState(true);
             }
             else
             {
@@ -124,9 +118,8 @@ namespace DaftAppleGames.Editor
             }
 
             log.Log(LogLevel.Info, $"Uninstalling...", true);
-            PostUnInstallation(_localPackageCopy, log);
+            bool installResult = _localPackageCopy.UnInstall(log);
             log.Log(LogLevel.Info, $"Uninstall Complete!", true);
-            _localPackageCopy.SetInstallState(false);
         }
 
         private void ReInstall()
@@ -147,8 +140,5 @@ namespace DaftAppleGames.Editor
             _unInstallButton.SetEnabled(installedState);
             _reInstallButton.SetEnabled(installedState);
         }
-
-        protected abstract void PostInstallation(PackageContents packageContents, EditorLog editorLog);
-        protected abstract void PostUnInstallation(PackageContents packageContents, EditorLog editorLog);
     }
 }

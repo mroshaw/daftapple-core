@@ -1,9 +1,6 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/daftapple-core/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=b92b529d400a4f84db355c6f295a3efa&amp;type=3#EditorWindowStyles" />
     <engine:VisualElement name="EditorWindow" class="EditorWindow">
-        <engine:Label name="IntroText" binding-path="introText" class="IntroText" />
-        <engine:Button text="Install" name="InstallButton" binding-path="Install()" class="Button" />
-        <engine:Button text="Re-install" name="ReInstallButton" class="Button" />
-        <engine:Button text="Uninstall" name="UnInstallButton" class="Button" />
+        <engine:Button text="Deploy Building Tools Samples" name="DeployBuildingToolsSamplesButton" class="Button" />
     </engine:VisualElement>
 </engine:UXML>
