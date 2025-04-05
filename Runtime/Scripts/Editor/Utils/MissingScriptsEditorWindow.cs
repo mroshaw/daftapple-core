@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using DaftAppleGames.Editor;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace DaftAppleGames.BuildingTools.Editor
+namespace DaftAppleGames.Editor
 {
     public class MissingScriptsEditorWindow : BaseEditorWindow
     {

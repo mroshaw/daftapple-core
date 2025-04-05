@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 
 namespace DaftAppleGames.Utilities
@@ -27,11 +28,11 @@ namespace DaftAppleGames.Utilities
             // Draw lines to form the cone edges
             for (int i = 0; i <= coneResolution; i++)
             {
-                float stepAngle = -fieldOfViewAngle / 2 + (fieldOfViewAngle / coneResolution) * i;
+                float stepAngle = -fieldOfViewAngle / 2 + fieldOfViewAngle / coneResolution * i;
                 Vector3 coneEdge = Quaternion.Euler(0, stepAngle, 0) * forward;
                 Gizmos.DrawRay(startTransform.position, coneEdge);
             }
         }
-
     }
 }
+#endif
