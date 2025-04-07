@@ -9,7 +9,8 @@ namespace DaftAppleGames.Editor
     {
         [SerializeField] private VisualTreeAsset baseVisualTree;
         [SerializeField] private VisualTreeAsset customEditorVisualTree;
-        [SerializeField] private bool loggingEnabled = true;
+        [SerializeField] private bool detailedLogging;
+        [SerializeField] private bool logToConsole;
 
         // Bound text to display in the Editor
         [SerializeField] private string logText;
@@ -17,7 +18,8 @@ namespace DaftAppleGames.Editor
         [SerializeField] private string introText;
 
         // Logging instance
-        protected readonly EditorLog log = new(true, true);
+        protected EditorLog Log;
+        protected VisualElement CustomEditorRootVisualElement;
 
         private Button _clearLogButton;
         private VisualElement _customEditorContainer;
@@ -31,52 +33,65 @@ namespace DaftAppleGames.Editor
 
         public virtual void CreateGUI()
         {
-            log.LogChangedEvent.RemoveListener(LogChangedHandler);
-            log.LogChangedEvent.AddListener(LogChangedHandler);
+            Log = new EditorLog(logToConsole, detailedLogging);
+            Log.LogChangedEvent.RemoveListener(LogChangedHandler);
+            Log.LogChangedEvent.AddListener(LogChangedHandler);
 
             baseVisualTree.CloneTree(rootVisualElement);
 
             // Setup the custom editor content in the container placeholder
+            _customEditorContainer = rootVisualElement.Q<VisualElement>("CustomEditorContainer");
             if (customEditorVisualTree)
             {
-                VisualElement customEditorRoot = customEditorVisualTree.Instantiate();
-                _customEditorContainer = rootVisualElement.Q<VisualElement>("CustomEditorContainer");
-                _customEditorContainer.Add(customEditorRoot);
+                CustomEditorRootVisualElement = customEditorVisualTree.Instantiate();
+                _customEditorContainer.Add(CustomEditorRootVisualElement);
             }
 
             TextField logTextField = rootVisualElement.Q<TextField>("LogText");
-            if (logTextField != null)
+            logTextField.RegisterValueChangedCallback(_ => ScrollLogToBottom());
+            _logTextScrollView = logTextField.Q<ScrollView>();
+
+            Toggle logToConsoleToggle = rootVisualElement.Q<Toggle>("LogToConsoleToggle");
+            logToConsoleToggle?.RegisterValueChangedCallback(evt => LogToConsoleToggled(evt.newValue));
+            if (logToConsoleToggle != null)
             {
-                logTextField.RegisterValueChangedCallback(evt => ScrollLogToBottom());
-                _logTextScrollView = logTextField.Q<ScrollView>();
+                logToConsole = logToConsoleToggle.value;
             }
 
+
             Toggle detailedLoggingToggle = rootVisualElement.Q<Toggle>("DetailedLoggingToggle");
+            detailedLoggingToggle?.RegisterValueChangedCallback(evt => DetailedLoggingToggled(evt.newValue));
             if (detailedLoggingToggle != null)
             {
-                detailedLoggingToggle.RegisterValueChangedCallback(evt => DetailedLoggingToggled(evt.newValue));
+                detailedLogging = detailedLoggingToggle.value;
             }
 
             Button clearLogButton = rootVisualElement.Q<Button>("ClearLogButton");
-            if (clearLogButton != null)
-            {
-                clearLogButton.clicked += ClearLog;
-            }
-
-            // Bind to UI
-            _serializedObject = new SerializedObject(this);
-            rootVisualElement.Bind(_serializedObject);
+            clearLogButton.clicked -= ClearLog;
+            clearLogButton.clicked += ClearLog;
 
             titleText = ToolTitle;
             introText = IntroText;
 
             ClearLog();
-            log.Log(LogLevel.Info, WelcomeLogText);
+            Log.Log(LogLevel.Info, WelcomeLogText);
+        }
+
+        protected void BindUI()
+        {
+            // Bind to UI
+            _serializedObject = new SerializedObject(this);
+            rootVisualElement.Bind(_serializedObject);
+        }
+
+        private void LogToConsoleToggled(bool value)
+        {
+            Log.LogToConsole = value;
         }
 
         private void DetailedLoggingToggled(bool value)
         {
-            log.DetailedLogging = value;
+            Log.DetailedLogging = value;
         }
 
         private void LogChangedHandler(EditorLog changedLog)
@@ -87,7 +102,7 @@ namespace DaftAppleGames.Editor
 
         private void ClearLog()
         {
-            log.Clear();
+            Log.Clear();
         }
 
         private void ScrollLogToBottom()

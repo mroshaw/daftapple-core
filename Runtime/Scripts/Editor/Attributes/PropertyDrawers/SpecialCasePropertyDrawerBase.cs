@@ -19,7 +19,7 @@ namespace DaftAppleGames.Editor.Attributes
 
             // Validate
             ValidatorAttribute[] validatorAttributes = PropertyUtility.GetAttributes<ValidatorAttribute>(property);
-            foreach (var validatorAttribute in validatorAttributes)
+            foreach (ValidatorAttribute validatorAttribute in validatorAttributes)
             {
                 validatorAttribute.GetValidator().ValidateProperty(property);
             }
@@ -28,7 +28,7 @@ namespace DaftAppleGames.Editor.Attributes
             EditorGUI.BeginChangeCheck();
             bool enabled = PropertyUtility.IsEnabled(property);
 
-            using (new EditorGUI.DisabledScope(disabled: !enabled))
+            using (new EditorGUI.DisabledScope(!enabled))
             {
                 OnGUI_Internal(rect, property, PropertyUtility.GetLabel(property));
             }
@@ -51,25 +51,19 @@ namespace DaftAppleGames.Editor.Attributes
 
     public static class SpecialCaseDrawerAttributeExtensions
     {
-        private static Dictionary<Type, SpecialCasePropertyDrawerBase> _drawersByAttributeType;
+        private static readonly Dictionary<Type, SpecialCasePropertyDrawerBase> DrawersByAttributeType;
 
         static SpecialCaseDrawerAttributeExtensions()
         {
-            _drawersByAttributeType = new Dictionary<Type, SpecialCasePropertyDrawerBase>();
-            _drawersByAttributeType[typeof(ReorderableListAttribute)] = ReorderableListPropertyDrawer.Instance;
+            DrawersByAttributeType = new Dictionary<Type, SpecialCasePropertyDrawerBase>
+            {
+                [typeof(ReorderableListAttribute)] = ReorderableListPropertyDrawer.Instance
+            };
         }
 
         public static SpecialCasePropertyDrawerBase GetDrawer(this SpecialCaseDrawerAttribute attr)
         {
-            SpecialCasePropertyDrawerBase drawer;
-            if (_drawersByAttributeType.TryGetValue(attr.GetType(), out drawer))
-            {
-                return drawer;
-            }
-            else
-            {
-                return null;
-            }
+            return DrawersByAttributeType.GetValueOrDefault(attr.GetType());
         }
     }
 }

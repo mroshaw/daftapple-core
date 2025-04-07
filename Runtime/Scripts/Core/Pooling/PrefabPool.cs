@@ -4,7 +4,6 @@ using Sirenix.OdinInspector;
 using DaftAppleGames.Attributes;
 #endif
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -15,7 +14,7 @@ namespace DaftAppleGames.Pooling
         FootstepMarks,
         FootstepParticles,
         AiCharacter
-    };
+    }
 
     public class PrefabPool : MonoBehaviour
     {
@@ -118,7 +117,7 @@ namespace DaftAppleGames.Pooling
             prefabInstance.SetActive(false);
         }
 
-        private void PrefabInstanceOnDestroyPoolObject(GameObject prefabInstance)
+        private static void PrefabInstanceOnDestroyPoolObject(GameObject prefabInstance)
         {
             Destroy(prefabInstance);
         }

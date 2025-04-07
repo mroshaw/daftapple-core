@@ -1,7 +1,4 @@
 using System.IO;
-using System.Net;
-using Codice.Client.Commands.WkTree;
-using Unity.CodeEditor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;

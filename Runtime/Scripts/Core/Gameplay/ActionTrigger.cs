@@ -43,11 +43,13 @@ namespace DaftAppleGames.Gameplay
                 return;
             }
 
-            if (CollisionIsValid(other))
+            if (!CollisionIsValid(other))
             {
-                TriggerEnter(other);
-                triggerEnterEvent.Invoke(other);
+                return;
             }
+
+            TriggerEnter(other);
+            triggerEnterEvent.Invoke(other);
         }
 
         private void OnTriggerExit(Collider other)
@@ -57,32 +59,32 @@ namespace DaftAppleGames.Gameplay
                 return;
             }
 
-            if (CollisionIsValid(other))
+            if (!CollisionIsValid(other))
             {
-                TriggerExit(other);
-                triggerExitEvent.Invoke(other);
+                return;
             }
+
+            TriggerExit(other);
+            triggerExitEvent.Invoke(other);
         }
 
         private bool CollisionIsValid(Collider other)
         {
             // Compare tags
-            if (triggerTags.Length == 0 || triggerTags.Contains(other.tag))
+            if (triggerTags.Length != 0 && !triggerTags.Contains(other.tag))
             {
-                // Compare Layers
-                if (triggerLayerMask == 0 || ((1 << other.gameObject.layer) & triggerLayerMask) != 0)
-                {
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            // Compare Layers
+            return triggerLayerMask == 0 || ((1 << other.gameObject.layer) & triggerLayerMask) != 0;
         }
 
-        public abstract void TriggerEnter(Collider other);
-        public abstract void TriggerExit(Collider other);
+        protected abstract void TriggerEnter(Collider other);
+        protected abstract void TriggerExit(Collider other);
 
         #region Unity Editor methods
+
 #if UNITY_EDITOR
         public virtual void ConfigureInEditor(LayerMask newTriggerLayerMask, string[] newTriggerTags)
         {
@@ -90,6 +92,7 @@ namespace DaftAppleGames.Gameplay
             triggerTags = newTriggerTags;
         }
 #endif
+
         #endregion
     }
 }

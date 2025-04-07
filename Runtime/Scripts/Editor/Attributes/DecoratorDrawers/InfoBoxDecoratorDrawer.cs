@@ -1,4 +1,5 @@
-﻿using DaftAppleGames.Attributes;
+﻿using System;
+using DaftAppleGames.Attributes;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ namespace DaftAppleGames.Editor.Attributes
             InfoBoxAttribute infoBoxAttribute = (InfoBoxAttribute)attribute;
 
             float indentLength = DaftAppleEditorGUI.GetIndentLength(rect);
-            Rect infoBoxRect = new Rect(
+            Rect infoBoxRect = new(
                 rect.x + indentLength,
                 rect.y,
                 rect.width - indentLength,
@@ -36,23 +37,15 @@ namespace DaftAppleGames.Editor.Attributes
             return height;
         }
 
-        private void DrawInfoBox(Rect rect, string infoText, EInfoBoxType infoBoxType)
+        private static void DrawInfoBox(Rect rect, string infoText, EInfoBoxType infoBoxType)
         {
-            MessageType messageType = MessageType.None;
-            switch (infoBoxType)
+            MessageType messageType = infoBoxType switch
             {
-                case EInfoBoxType.Normal:
-                    messageType = MessageType.Info;
-                    break;
-
-                case EInfoBoxType.Warning:
-                    messageType = MessageType.Warning;
-                    break;
-
-                case EInfoBoxType.Error:
-                    messageType = MessageType.Error;
-                    break;
-            }
+                EInfoBoxType.Normal => MessageType.Info,
+                EInfoBoxType.Warning => MessageType.Warning,
+                EInfoBoxType.Error => MessageType.Error,
+                _ => throw new ArgumentOutOfRangeException(nameof(infoBoxType), infoBoxType, null)
+            };
 
             DaftAppleEditorGUI.HelpBox(rect, infoText, messageType);
         }

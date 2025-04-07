@@ -10,10 +10,6 @@ namespace DaftAppleGames.Editor
     /// </summary>
     public static class CustomEditorTools
     {
-        #region Static properties
-
-        #endregion
-
         #region Class methods
 
         /// <summary>
@@ -81,11 +77,13 @@ namespace DaftAppleGames.Editor
             for (int i = 0; i < tagsProp.arraySize; i++)
             {
                 SerializedProperty tagSp = tagsProp.GetArrayElementAtIndex(i);
-                if (tagSp != null && tagSp.stringValue == tagName)
+                if (tagSp == null || tagSp.stringValue != tagName)
                 {
-                    Debug.LogWarning($"Tag \"{tagName}\" already exists.");
-                    return;
+                    continue;
                 }
+
+                Debug.LogWarning($"Tag \"{tagName}\" already exists.");
+                return;
             }
 
             // Add the new tag
@@ -138,24 +136,28 @@ namespace DaftAppleGames.Editor
             for (int i = 0; i < layersProp.arraySize; i++)
             {
                 SerializedProperty layerSp = layersProp.GetArrayElementAtIndex(i);
-                if (layerSp != null && layerSp.stringValue == layerName)
+                if (layerSp == null || layerSp.stringValue != layerName)
                 {
-                    Debug.LogWarning($"Layer \"{layerName}\" already exists.");
-                    return;
+                    continue;
                 }
+
+                Debug.LogWarning($"Layer \"{layerName}\" already exists.");
+                return;
             }
 
             // Add the layer to the first empty slot (user-defined layers start at index 8)
             for (int i = 8; i < layersProp.arraySize; i++)
             {
                 SerializedProperty layerSp = layersProp.GetArrayElementAtIndex(i);
-                if (layerSp != null && string.IsNullOrEmpty(layerSp.stringValue))
+                if (layerSp == null || !string.IsNullOrEmpty(layerSp.stringValue))
                 {
-                    layerSp.stringValue = layerName;
-                    Debug.Log($"Added layer \"{layerName}\" at index {i}.");
-                    tagManager.ApplyModifiedProperties();
-                    return;
+                    continue;
                 }
+
+                layerSp.stringValue = layerName;
+                Debug.Log($"Added layer \"{layerName}\" at index {i}.");
+                tagManager.ApplyModifiedProperties();
+                return;
             }
 
             Debug.LogError("No empty slots available for new layers.");

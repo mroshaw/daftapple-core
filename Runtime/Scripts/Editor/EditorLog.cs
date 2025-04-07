@@ -1,24 +1,35 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace DaftAppleGames.Editor
 {
-    public enum LogLevel { Info, Warning, Error }
+    public enum LogLevel
+    {
+        Info,
+        Debug,
+        Warning,
+        Error
+    }
 
+    /// <summary>
+    /// Editor Log class that can easily be incorporated into UI logging elements in Editor Windows
+    /// </summary>
     public class EditorLog
     {
         private readonly List<string> _logEntries;
-        private readonly bool _logToConsole;
 
         public bool DetailedLogging { set; private get; }
+        public bool LogToConsole { set; private get; }
 
-        public readonly UnityEvent<EditorLog> LogChangedEvent = new UnityEvent<EditorLog>();
+        public readonly UnityEvent<EditorLog> LogChangedEvent = new();
 
-        public EditorLog(bool logToConsole, bool detailedLogging)
+        public EditorLog(bool logToConsole, bool includeDetailedLogging)
         {
+            DetailedLogging = includeDetailedLogging;
+            LogToConsole = logToConsole;
             _logEntries = new List<string>();
-            _logToConsole = logToConsole;
         }
 
         public void Log(string logEntry)
@@ -28,39 +39,49 @@ namespace DaftAppleGames.Editor
 
         public void Log(LogLevel logLevel, string logEntry, bool forceLog = false)
         {
-            string fullLogText = "";
+            string fullLogText;
 
             switch (logLevel)
             {
                 case LogLevel.Info:
-                    if (!DetailedLogging && !forceLog)
-                    {
-                        return;
-                    }
                     fullLogText = $"Info: {logEntry}";
-                    if (_logToConsole)
+                    if (LogToConsole)
                     {
                         Debug.Log(logEntry);
                     }
+
                     break;
-                case LogLevel.Warning:
+                case LogLevel.Debug:
                     if (!DetailedLogging && !forceLog)
                     {
                         return;
                     }
+
+                    fullLogText = $"Debug: {logEntry}";
+                    if (LogToConsole)
+                    {
+                        Debug.Log(logEntry);
+                    }
+
+                    break;
+                case LogLevel.Warning:
                     fullLogText = $"Warning: {logEntry}";
-                    if (_logToConsole)
+                    if (LogToConsole)
                     {
                         Debug.LogWarning(logEntry);
                     }
+
                     break;
                 case LogLevel.Error:
                     fullLogText = $"Error: {logEntry}";
-                    if (_logToConsole)
+                    if (LogToConsole)
                     {
                         Debug.LogError(logEntry);
                     }
+
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
             }
 
             _logEntries.Add(fullLogText);
@@ -81,6 +102,7 @@ namespace DaftAppleGames.Editor
             {
                 logString += logEntry + "\n";
             }
+
             return logString.TrimEnd('\n');
         }
     }

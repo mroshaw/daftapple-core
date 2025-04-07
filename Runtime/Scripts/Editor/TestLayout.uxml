@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/daftapple-core/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=b92b529d400a4f84db355c6f295a3efa&amp;type=3#EditorWindowStyles" />
+    <ui:VisualElement name="VisualElement" style="flex-grow: 1;">
+        <ui:VisualElement class="OutlineContainer">
+            <ui:Label text="Label" />
+            <ui:Label text="Label" />
+            <ui:Button text="Button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

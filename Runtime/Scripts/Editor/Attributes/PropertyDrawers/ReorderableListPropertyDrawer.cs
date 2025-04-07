@@ -1,50 +1,56 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
 using System.Collections.Generic;
 using DaftAppleGames.Attributes;
+using Object = UnityEngine.Object;
 
 namespace DaftAppleGames.Editor.Attributes
 {
     public class ReorderableListPropertyDrawer : SpecialCasePropertyDrawerBase
     {
-        public static readonly ReorderableListPropertyDrawer Instance = new ReorderableListPropertyDrawer();
+        public static readonly ReorderableListPropertyDrawer Instance = new();
 
-        private readonly Dictionary<string, ReorderableList> _reorderableListsByPropertyName = new Dictionary<string, ReorderableList>();
+        private readonly Dictionary<string, ReorderableList> _reorderableListsByPropertyName = new();
 
         private GUIStyle _labelStyle;
 
         private GUIStyle GetLabelStyle()
         {
-            if (_labelStyle == null)
+            if (_labelStyle != null)
             {
-                _labelStyle = new GUIStyle(EditorStyles.boldLabel);
-                _labelStyle.richText = true;
+                return _labelStyle;
             }
+
+            _labelStyle = new GUIStyle(EditorStyles.boldLabel)
+            {
+                richText = true
+            };
 
             return _labelStyle;
         }
 
-        private string GetPropertyKeyName(SerializedProperty property)
+        private static string GetPropertyKeyName(SerializedProperty property)
         {
             return property.serializedObject.targetObject.GetInstanceID() + "." + property.name;
         }
 
         protected override float GetPropertyHeight_Internal(SerializedProperty property)
         {
-            if (property.isArray)
+            if (!property.isArray)
             {
-                string key = GetPropertyKeyName(property);
-
-                if (_reorderableListsByPropertyName.TryGetValue(key, out ReorderableList reorderableList) == false)
-                {
-                    return 0;
-                }
-
-                return reorderableList.GetHeight();
+                return EditorGUI.GetPropertyHeight(property, true);
             }
 
-            return EditorGUI.GetPropertyHeight(property, true);
+            string key = GetPropertyKeyName(property);
+
+            if (_reorderableListsByPropertyName.TryGetValue(key, out ReorderableList reorderableList) == false)
+            {
+                return 0;
+            }
+
+            return reorderableList.GetHeight();
         }
 
         protected override void OnGUI_Internal(Rect rect, SerializedProperty property, GUIContent label)
@@ -58,13 +64,13 @@ namespace DaftAppleGames.Editor.Attributes
                 {
                     reorderableList = new ReorderableList(property.serializedObject, property, true, true, true, true)
                     {
-                        drawHeaderCallback = (Rect r) =>
+                        drawHeaderCallback = r =>
                         {
-                            EditorGUI.LabelField(r, string.Format("{0}: {1}", label.text, property.arraySize), GetLabelStyle());
-                            HandleDragAndDrop(r, reorderableList);
+                            EditorGUI.LabelField(r, $"{label.text}: {property.arraySize}", GetLabelStyle());
+                            HandleDragAndDrop(r, null);
                         },
 
-                        drawElementCallback = (Rect r, int index, bool isActive, bool isFocused) =>
+                        drawElementCallback = (r, index, _, _) =>
                         {
                             SerializedProperty element = property.GetArrayElementAtIndex(index);
                             r.y += 1.0f;
@@ -74,10 +80,7 @@ namespace DaftAppleGames.Editor.Attributes
                             EditorGUI.PropertyField(new Rect(r.x, r.y, r.width, EditorGUIUtility.singleLineHeight), element, true);
                         },
 
-                        elementHeightCallback = (int index) =>
-                        {
-                            return EditorGUI.GetPropertyHeight(property.GetArrayElementAtIndex(index)) + 4.0f;
-                        }
+                        elementHeightCallback = (int index) => EditorGUI.GetPropertyHeight(property.GetArrayElementAtIndex(index)) + 4.0f
                     };
 
                     _reorderableListsByPropertyName[key] = reorderableList;
@@ -96,8 +99,8 @@ namespace DaftAppleGames.Editor.Attributes
             }
             else
             {
-                string message = typeof(ReorderableListAttribute).Name + " can be used only on arrays or lists";
-                DaftAppleEditorGUI.HelpBox_Layout(message, MessageType.Warning, context: property.serializedObject.targetObject);
+                string message = nameof(ReorderableListAttribute) + " can be used only on arrays or lists";
+                DaftAppleEditorGUI.HelpBox_Layout(message, MessageType.Warning, property.serializedObject.targetObject);
                 EditorGUILayout.PropertyField(property, true);
             }
         }
@@ -107,51 +110,49 @@ namespace DaftAppleGames.Editor.Attributes
             _reorderableListsByPropertyName.Clear();
         }
 
-        private Object GetAssignableObject(Object obj, ReorderableList list)
+        private static Object GetAssignableObject(Object obj, ReorderableList list)
         {
-            System.Type listType = PropertyUtility.GetPropertyType(list.serializedProperty);
-            System.Type elementType = ReflectionUtility.GetListElementType(listType);
+            Type listType = PropertyUtility.GetPropertyType(list.serializedProperty);
+            Type elementType = ReflectionUtility.GetListElementType(listType);
 
             if (elementType == null)
             {
                 return null;
             }
 
-            System.Type objType = obj.GetType();
+            Type objType = obj.GetType();
 
             if (elementType.IsAssignableFrom(objType))
             {
                 return obj;
             }
 
-            if (objType == typeof(GameObject))
+            if (objType != typeof(GameObject))
             {
-                if (typeof(Transform).IsAssignableFrom(elementType))
+                return null;
+            }
+
+            if (typeof(Transform).IsAssignableFrom(elementType))
+            {
+                Transform transform = ((GameObject)obj).transform;
+                if (elementType == typeof(RectTransform))
                 {
-                    Transform transform = ((GameObject)obj).transform;
-                    if (elementType == typeof(RectTransform))
-                    {
-                        RectTransform rectTransform = transform as RectTransform;
-                        return rectTransform;
-                    }
-                    else
-                    {
-                        return transform;
-                    }
+                    RectTransform rectTransform = transform as RectTransform;
+                    return rectTransform;
                 }
-                else if (typeof(MonoBehaviour).IsAssignableFrom(elementType))
+                else
                 {
-                    return ((GameObject)obj).GetComponent(elementType);
+                    return transform;
                 }
             }
 
-            return null;
+            return typeof(MonoBehaviour).IsAssignableFrom(elementType) ? ((GameObject)obj).GetComponent(elementType) : null;
         }
 
         private void HandleDragAndDrop(Rect rect, ReorderableList list)
         {
-            var currentEvent = Event.current;
-            var usedEvent = false;
+            Event currentEvent = Event.current;
+            bool usedEvent = false;
 
             switch (currentEvent.type)
             {
@@ -173,17 +174,21 @@ namespace DaftAppleGames.Editor.Attributes
                         foreach (Object obj in references)
                         {
                             Object assignableObject = GetAssignableObject(obj, list);
-                            if (assignableObject != null)
+                            if (assignableObject == null)
                             {
-                                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
-                                if (currentEvent.type == EventType.DragPerform)
-                                {
-                                    list.serializedProperty.arraySize++;
-                                    int arrayEnd = list.serializedProperty.arraySize - 1;
-                                    list.serializedProperty.GetArrayElementAtIndex(arrayEnd).objectReferenceValue = assignableObject;
-                                    didAcceptDrag = true;
-                                }
+                                continue;
                             }
+
+                            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                            if (currentEvent.type != EventType.DragPerform)
+                            {
+                                continue;
+                            }
+
+                            list.serializedProperty.arraySize++;
+                            int arrayEnd = list.serializedProperty.arraySize - 1;
+                            list.serializedProperty.GetArrayElementAtIndex(arrayEnd).objectReferenceValue = assignableObject;
+                            didAcceptDrag = true;
                         }
 
                         if (didAcceptDrag)
@@ -195,6 +200,52 @@ namespace DaftAppleGames.Editor.Attributes
                     }
 
                     break;
+                case EventType.MouseDown:
+                    break;
+                case EventType.MouseUp:
+                    break;
+                case EventType.MouseMove:
+                    break;
+                case EventType.MouseDrag:
+                    break;
+                case EventType.KeyDown:
+                    break;
+                case EventType.KeyUp:
+                    break;
+                case EventType.ScrollWheel:
+                    break;
+                case EventType.Repaint:
+                    break;
+                case EventType.Layout:
+                    break;
+                case EventType.Ignore:
+                    break;
+                case EventType.Used:
+                    break;
+                case EventType.ValidateCommand:
+                    break;
+                case EventType.ExecuteCommand:
+                    break;
+                case EventType.ContextClick:
+                    break;
+                case EventType.MouseEnterWindow:
+                    break;
+                case EventType.MouseLeaveWindow:
+                    break;
+                case EventType.TouchDown:
+                    break;
+                case EventType.TouchUp:
+                    break;
+                case EventType.TouchMove:
+                    break;
+                case EventType.TouchEnter:
+                    break;
+                case EventType.TouchLeave:
+                    break;
+                case EventType.TouchStationary:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             if (usedEvent)

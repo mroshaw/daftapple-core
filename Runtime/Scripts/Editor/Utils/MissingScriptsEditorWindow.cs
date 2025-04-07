@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -83,45 +82,10 @@ namespace DaftAppleGames.Editor
             ConfigureListView(_assetObjectsListView);
         }
 
-        private void ConfigureListView(ListView listView)
+        private static void ConfigureListView(ListView listView)
         {
             listView.showBoundCollectionSize = false;
             listView.SetEnabled(false);
-        }
-
-        /// <summary>
-        ///     Set up binding for creation of new list view items
-        /// </summary>
-        private void ConfigureListView(ListView listView, List<GameObject> gameObjectList)
-        {
-            listView.showBoundCollectionSize = false;
-
-            // Define item creation and binding
-            listView.makeItem = () =>
-            {
-                ObjectField objectField = new() { objectType = typeof(GameObject) };
-                objectField.AddToClassList("Field");
-                return objectField;
-            };
-
-            listView.bindItem = (element, index) =>
-            {
-                if (index < gameObjectList.Count)
-                {
-                    if (element is ObjectField objectField)
-                    {
-                        objectField.SetEnabled(false);
-                        objectField.value = gameObjectList[index];
-                        // objectField.RegisterValueChangedCallback(evt => { gameObjectList[index] = evt.newValue as GameObject; });
-                    }
-                }
-            };
-
-            listView.itemsSource = gameObjectList;
-            listView.reorderable = true;
-            listView.selectionType = SelectionType.Single;
-
-            listView.Rebuild();
         }
 
         #endregion
@@ -131,7 +95,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindInScene()
         {
-            log.Log(LogLevel.Info, "Searching for missing scripts in open scenes...");
+            Log.Log(LogLevel.Info, "Searching for missing scripts in open scenes...");
             FindMissingScriptsInOpenScenes(false);
         }
 
@@ -140,7 +104,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindAndDeleteInScene()
         {
-            log.Log(LogLevel.Info, "Searching for and deleting missing scripts in open scenes...");
+            Log.Log(LogLevel.Info, "Searching for and deleting missing scripts in open scenes...");
             FindMissingScriptsInOpenScenes(true);
         }
 
@@ -149,7 +113,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindInAssets()
         {
-            log.Log(LogLevel.Info, "Searching for missing scripts in assets...");
+            Log.Log(LogLevel.Info, "Searching for missing scripts in assets...");
             FindMissingScriptsInAssets(false);
         }
 
@@ -158,7 +122,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindAndDeleteInAssets()
         {
-            log.Log(LogLevel.Info, "Searching for and deleting missing scripts in assets...");
+            Log.Log(LogLevel.Info, "Searching for and deleting missing scripts in assets...");
             FindMissingScriptsInAssets(true);
         }
 
@@ -177,7 +141,7 @@ namespace DaftAppleGames.Editor
                 }
             }
 
-            log.Log(LogLevel.Info, $"Found {objectsWithMissingScriptsInScenes.Count} missing script(s) in open scenes.");
+            Log.Log(LogLevel.Info, $"Found {objectsWithMissingScriptsInScenes.Count} missing script(s) in open scenes.");
 
             if (deleteScripts)
             {
@@ -196,7 +160,7 @@ namespace DaftAppleGames.Editor
             bool hasMissingScript = components.Any(c => c == null);
             if (hasMissingScript)
             {
-                log.Log(LogLevel.Info, $"Found missing script on: {parentGameObject.name}");
+                Log.Log(LogLevel.Info, $"Found missing script on: {parentGameObject.name}");
                 objectsWithMissingScriptsInScenes.Add(parentGameObject);
             }
 
@@ -222,26 +186,30 @@ namespace DaftAppleGames.Editor
                     continue;
                 }
 
-                if (Path.GetExtension(assetPath) == ".prefab")
+                if (Path.GetExtension(assetPath) != ".prefab")
                 {
-                    GameObject assetRoot = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
-                    if (assetRoot == null)
-                    {
-                        continue;
-                    }
-
-                    Component[] components = assetRoot.GetComponentsInChildren<Component>(true);
-                    bool hasMissingScript = components.Any(c => c == null);
-                    if (hasMissingScript)
-                    {
-                        log.Log(LogLevel.Info, $"Found missing script on: {assetRoot.name}");
-                        missingAssetNames.Add(assetPath);
-                        objectsWithMissingScriptsInAssets.Add(assetRoot);
-                    }
+                    continue;
                 }
+
+                GameObject assetRoot = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+                if (assetRoot == null)
+                {
+                    continue;
+                }
+
+                Component[] components = assetRoot.GetComponentsInChildren<Component>(true);
+                bool hasMissingScript = components.Any(c => c == null);
+                if (!hasMissingScript)
+                {
+                    continue;
+                }
+
+                Log.Log(LogLevel.Info, $"Found missing script on: {assetRoot.name}");
+                missingAssetNames.Add(assetPath);
+                objectsWithMissingScriptsInAssets.Add(assetRoot);
             }
 
-            log.Log(LogLevel.Info, $"Found {objectsWithMissingScriptsInAssets.Count} missing script(s) in assets.");
+            Log.Log(LogLevel.Info, $"Found {objectsWithMissingScriptsInAssets.Count} missing script(s) in assets.");
 
             if (deleteScripts)
             {
@@ -253,19 +221,21 @@ namespace DaftAppleGames.Editor
 
         private void DeleteMissingScripts(List<GameObject> gameObjectsWithMissingScripts)
         {
-            log.Log(LogLevel.Info, "Deleting missing scripts...");
+            Log.Log(LogLevel.Info, "Deleting missing scripts...");
             foreach (GameObject go in gameObjectsWithMissingScripts)
             {
                 GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
-                log.Log($"Deleted missing script from: {go.name}");
-                if (go.hideFlags.HasFlag(HideFlags.HideInHierarchy))
+                Log.Log($"Deleted missing script from: {go.name}");
+                if (!go.hideFlags.HasFlag(HideFlags.HideInHierarchy))
                 {
-                    log.Log($"Revealing hidden GameObject: {go.name}");
-                    go.hideFlags &= ~HideFlags.HideInHierarchy;
+                    continue;
                 }
+
+                Log.Log($"Revealing hidden GameObject: {go.name}");
+                go.hideFlags &= ~HideFlags.HideInHierarchy;
             }
 
-            log.Log(LogLevel.Info, "Deleting missing scripts... Done.");
+            Log.Log(LogLevel.Info, "Deleting missing scripts... Done.");
         }
     }
 }

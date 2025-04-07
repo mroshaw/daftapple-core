@@ -1,10 +1,12 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/daftapple-core/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=b92b529d400a4f84db355c6f295a3efa&amp;type=3#EditorWindowStyles" />
-    <engine:VisualElement name="EditorWindow" class="EditorWindow">
-        <engine:Label name="TitleLabel" binding-path="titleText" text="Title Text" class="HeadingText" />
-        <engine:Label name="IntroText" binding-path="introText" text="Intro Test" class="IntroText" />
-        <engine:VisualElement name="CustomEditorContainer" class="CustomContentContainer" style="flex-shrink: 0;" />
-        <engine:Label text="Log:" class="Label" />
+    <engine:VisualElement name="EditorWindow" class="EditorWindow HorizontalAlignContainer">
+        <engine:VisualElement name="MainWindowContainer" style="flex-grow: 1;">
+            <engine:Label name="TitleLabel" binding-path="titleText" text="Title Text" class="HeadingText" />
+            <engine:Label name="IntroText" binding-path="introText" text="Intro Test" class="IntroText" />
+            <engine:Label text="Log:" class="Label" />
+            <engine:VisualElement name="CustomEditorContainer" class="CustomContentContainer" style="flex-shrink: 0;" />
+        </engine:VisualElement>
         <engine:VisualElement name="LoggingContainer" style="flex-grow: 1;">
             <engine:TextField name="LogText" binding-path="logText" multiline="true" readonly="true" vertical-scroller-visibility="AlwaysVisible" class="LogText" style="flex-direction: row; flex-shrink: 0; flex-grow: 1; bottom: 40px; top: 0;" />
             <engine:VisualElement name="LoggingControlsContainer">

@@ -8,16 +8,16 @@ using UnityEngine;
 namespace DaftAppleGames.Editor.Attributes
 {
     [CanEditMultipleObjects]
-    [CustomEditor(typeof(UnityEngine.Object), true)]
-    public class DaftAppleInspector : UnityEditor.Editor
+    [CustomEditor(typeof(Object), true)]
+    public sealed class DaftAppleInspector : UnityEditor.Editor
     {
-        private List<SerializedProperty> _serializedProperties = new List<SerializedProperty>();
+        private List<SerializedProperty> _serializedProperties = new();
         private IEnumerable<FieldInfo> _nonSerializedFields;
         private IEnumerable<PropertyInfo> _nativeProperties;
         private IEnumerable<MethodInfo> _methods;
-        private Dictionary<string, SavedBool> _foldouts = new Dictionary<string, SavedBool>();
+        private readonly Dictionary<string, SavedBool> _foldouts = new();
 
-        protected virtual void OnEnable()
+        private void OnEnable()
         {
             _nonSerializedFields = ReflectionUtility.GetAllFields(
                 target, f => f.GetCustomAttributes(typeof(ShowNonSerializedFieldAttribute), true).Length > 0);
@@ -29,7 +29,7 @@ namespace DaftAppleGames.Editor.Attributes
                 target, m => m.GetCustomAttributes(typeof(ButtonAttribute), true).Length > 0);
         }
 
-        protected virtual void OnDisable()
+        private void OnDisable()
         {
             ReorderableListPropertyDrawer.Instance.ClearCache();
         }
@@ -53,65 +53,66 @@ namespace DaftAppleGames.Editor.Attributes
             DrawButtons();
         }
 
-        protected void GetSerializedProperties(ref List<SerializedProperty> outSerializedProperties)
+        private void GetSerializedProperties(ref List<SerializedProperty> outSerializedProperties)
         {
             outSerializedProperties.Clear();
-            using (var iterator = serializedObject.GetIterator())
+            using SerializedProperty iterator = serializedObject.GetIterator();
+            if (!iterator.NextVisible(true))
             {
-                if (iterator.NextVisible(true))
-                {
-                    do
-                    {
-                        outSerializedProperties.Add(serializedObject.FindProperty(iterator.name));
-                    }
-                    while (iterator.NextVisible(false));
-                }
+                return;
             }
+
+            do
+            {
+                outSerializedProperties.Add(serializedObject.FindProperty(iterator.name));
+            } while (iterator.NextVisible(false));
         }
 
-        protected void DrawSerializedProperties()
+        private void DrawSerializedProperties()
         {
             serializedObject.Update();
 
             // Draw non-grouped serialized properties
-            foreach (var property in GetNonGroupedProperties(_serializedProperties))
+            foreach (SerializedProperty property in GetNonGroupedProperties(_serializedProperties))
             {
                 if (property.name.Equals("m_Script", System.StringComparison.Ordinal))
                 {
-                    using (new EditorGUI.DisabledScope(disabled: true))
+                    using (new EditorGUI.DisabledScope(true))
                     {
                         EditorGUILayout.PropertyField(property);
                     }
                 }
                 else
                 {
-                    DaftAppleEditorGUI.PropertyField_Layout(property, includeChildren: true);
+                    DaftAppleEditorGUI.PropertyField_Layout(property, true);
                 }
             }
 
             // Draw grouped serialized properties
-            foreach (var group in GetGroupedProperties(_serializedProperties))
+            foreach (IGrouping<string, SerializedProperty> group in GetGroupedProperties(_serializedProperties))
             {
-                IEnumerable<SerializedProperty> visibleProperties = group.Where(p => PropertyUtility.IsVisible(p));
-                if (!visibleProperties.Any())
+                IEnumerable<SerializedProperty> visibleProperties = group.Where(PropertyUtility.IsVisible);
+                IEnumerable<SerializedProperty> serializedProperties = visibleProperties as SerializedProperty[] ?? visibleProperties.ToArray();
+                if (!serializedProperties.Any())
                 {
                     continue;
                 }
 
                 DaftAppleEditorGUI.BeginBoxGroup_Layout(group.Key);
-                foreach (var property in visibleProperties)
+                foreach (SerializedProperty property in serializedProperties)
                 {
-                    DaftAppleEditorGUI.PropertyField_Layout(property, includeChildren: true);
+                    DaftAppleEditorGUI.PropertyField_Layout(property, true);
                 }
 
                 DaftAppleEditorGUI.EndBoxGroup_Layout();
             }
 
             // Draw foldout serialized properties
-            foreach (var group in GetFoldoutProperties(_serializedProperties))
+            foreach (IGrouping<string, SerializedProperty> group in GetFoldoutProperties(_serializedProperties))
             {
-                IEnumerable<SerializedProperty> visibleProperties = group.Where(p => PropertyUtility.IsVisible(p));
-                if (!visibleProperties.Any())
+                IEnumerable<SerializedProperty> visibleProperties = group.Where(PropertyUtility.IsVisible);
+                IEnumerable<SerializedProperty> serializedProperties = visibleProperties as SerializedProperty[] ?? visibleProperties.ToArray();
+                if (!serializedProperties.Any())
                 {
                     continue;
                 }
@@ -122,72 +123,80 @@ namespace DaftAppleGames.Editor.Attributes
                 }
 
                 _foldouts[group.Key].Value = EditorGUILayout.Foldout(_foldouts[group.Key].Value, group.Key, true);
-                if (_foldouts[group.Key].Value)
+                if (!_foldouts[group.Key].Value)
                 {
-                    foreach (var property in visibleProperties)
-                    {
-                        DaftAppleEditorGUI.PropertyField_Layout(property, true);
-                    }
+                    continue;
+                }
+
+                foreach (SerializedProperty property in serializedProperties)
+                {
+                    DaftAppleEditorGUI.PropertyField_Layout(property, true);
                 }
             }
 
             serializedObject.ApplyModifiedProperties();
         }
 
-        protected void DrawNonSerializedFields(bool drawHeader = false)
+        private void DrawNonSerializedFields(bool drawHeader = false)
         {
-            if (_nonSerializedFields.Any())
+            if (!_nonSerializedFields.Any())
             {
-                if (drawHeader)
-                {
-                    EditorGUILayout.Space();
-                    EditorGUILayout.LabelField("Non-Serialized Fields", GetHeaderGUIStyle());
-                    DaftAppleEditorGUI.HorizontalLine(
-                        EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
-                }
+                return;
+            }
 
-                foreach (var field in _nonSerializedFields)
-                {
-                    DaftAppleEditorGUI.NonSerializedField_Layout(serializedObject.targetObject, field);
-                }
+            if (drawHeader)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Non-Serialized Fields", GetHeaderGUIStyle());
+                DaftAppleEditorGUI.HorizontalLine(
+                    EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
+            }
+
+            foreach (FieldInfo field in _nonSerializedFields)
+            {
+                DaftAppleEditorGUI.NonSerializedField_Layout(serializedObject.targetObject, field);
             }
         }
 
-        protected void DrawNativeProperties(bool drawHeader = false)
+        private void DrawNativeProperties(bool drawHeader = false)
         {
-            if (_nativeProperties.Any())
+            if (!_nativeProperties.Any())
             {
-                if (drawHeader)
-                {
-                    EditorGUILayout.Space();
-                    EditorGUILayout.LabelField("Native Properties", GetHeaderGUIStyle());
-                    DaftAppleEditorGUI.HorizontalLine(
-                        EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
-                }
+                return;
+            }
 
-                foreach (var property in _nativeProperties)
-                {
-                    DaftAppleEditorGUI.NativeProperty_Layout(serializedObject.targetObject, property);
-                }
+            if (drawHeader)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Native Properties", GetHeaderGUIStyle());
+                DaftAppleEditorGUI.HorizontalLine(
+                    EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
+            }
+
+            foreach (PropertyInfo property in _nativeProperties)
+            {
+                DaftAppleEditorGUI.NativeProperty_Layout(serializedObject.targetObject, property);
             }
         }
 
-        protected void DrawButtons(bool drawHeader = false)
+        private void DrawButtons(bool drawHeader = false)
         {
-            if (_methods.Any())
+            if (!_methods.Any())
             {
-                if (drawHeader)
-                {
-                    EditorGUILayout.Space();
-                    EditorGUILayout.LabelField("Buttons", GetHeaderGUIStyle());
-                    DaftAppleEditorGUI.HorizontalLine(
-                        EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
-                }
+                return;
+            }
 
-                foreach (var method in _methods)
-                {
-                    DaftAppleEditorGUI.Button(serializedObject.targetObject, method);
-                }
+            if (drawHeader)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Buttons", GetHeaderGUIStyle());
+                DaftAppleEditorGUI.HorizontalLine(
+                    EditorGUILayout.GetControlRect(false), HorizontalLineAttribute.DefaultHeight, HorizontalLineAttribute.DefaultColor.GetColor());
+            }
+
+            foreach (MethodInfo method in _methods)
+            {
+                DaftAppleEditorGUI.Button(serializedObject.targetObject, method);
             }
         }
 
@@ -212,9 +221,11 @@ namespace DaftAppleGames.Editor.Attributes
 
         private static GUIStyle GetHeaderGUIStyle()
         {
-            GUIStyle style = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
-            style.fontStyle = FontStyle.Bold;
-            style.alignment = TextAnchor.UpperCenter;
+            GUIStyle style = new(EditorStyles.centeredGreyMiniLabel)
+            {
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.UpperCenter
+            };
 
             return style;
         }

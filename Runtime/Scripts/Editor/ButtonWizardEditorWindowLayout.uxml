@@ -1,0 +1,8 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/daftapple-core/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=b92b529d400a4f84db355c6f295a3efa&amp;type=3#EditorWindowStyles" />
+    <engine:VisualElement name="PreButtonsContainer" style="flex-grow: 1;" />
+    <editor:ObjectField label="Settings:" name="SettingsField" type="DaftAppleGames.Editor.ButtonWizardEditorSettings, DaftAppleGames.Editor" binding-path="editorSettings" class="Field" />
+    <engine:Button text="Save a copy..." name="SaveLocalSettingsCopyButton" class="SkinnyButton" />
+    <editor:ObjectField label="Selected GameObject:" type="UnityEngine.GameObject, UnityEngine.CoreModule" binding-path="selectedGameObject" name="SelectedObjectField" class="Field" />
+    <engine:VisualElement name="ToolButtonsContainer" style="flex-grow: 1;" />
+</engine:UXML>

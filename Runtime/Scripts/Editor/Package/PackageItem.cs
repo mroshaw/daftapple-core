@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
 namespace DaftAppleGames.Editor.Package
@@ -42,8 +40,8 @@ namespace DaftAppleGames.Editor.Package
 
             bool fileAlreadyExists = File.Exists(absoluteDestinationFilePath);
 
-            bool ingoreFile = fileAlreadyExists && !overwriteExisting;
-            if (ingoreFile)
+            bool ignoreFile = fileAlreadyExists && !overwriteExisting;
+            if (ignoreFile)
             {
                 log.Log(LogLevel.Info, $"File already exists and overwrite is false. Skipping item: {itemAsset.name}");
             }
@@ -53,7 +51,7 @@ namespace DaftAppleGames.Editor.Package
             // If this is a prefab, instantiate an instance and save it as an asset to the target location
             if (PrefabUtility.IsPartOfPrefabAsset(itemAsset))
             {
-                if (!ingoreFile)
+                if (!ignoreFile)
                 {
                     GameObject prefabInstance = PrefabUtility.InstantiatePrefab(itemAsset) as GameObject;
                     PrefabUtility.SaveAsPrefabAsset(prefabInstance, relativeDestinationFilePath);
@@ -70,7 +68,7 @@ namespace DaftAppleGames.Editor.Package
             }
 
             // Save a copy to the destination
-            if (!ingoreFile)
+            if (!ignoreFile)
             {
                 AssetDatabase.CopyAsset(originalAssetFullPath, relativeDestinationFilePath);
             }

@@ -1,3 +1,4 @@
+using System;
 #if DAG_HDRP
 #if ODIN_INSPECTOR
 #endif
@@ -13,44 +14,53 @@ namespace DaftAppleGames.Lighting
         // Update on camera move variables
         [HideInInspector]
         public bool updateOnCameraMove;
+
         [HideInInspector]
         public Camera cameraToTrack;
 
         // Enums for the shadow map to refresh and the counter mode
         [HideInInspector]
         public ShadowMapToRefresh shadowMapToRefresh = ShadowMapToRefresh.EntireShadowMap;
+
         [HideInInspector]
         public CounterMode counterMode = CounterMode.Frames;
 
         // Unity GameObjects and components
         [HideInInspector]
         public Camera mainCamera;
+
         private HDAdditionalLightData _hdLight;
 
         // Full shadow map refresh counter variables
         [HideInInspector]
         public int fullShadowMapRefreshWaitFrames;
+
         [HideInInspector]
         public float fullShadowMapRefreshWaitSeconds;
+
         private int _framesCounterFullShadowMap;
         private float _secondsCounterFullShadowMap;
 
         // Cascades refresh counter variables
         [HideInInspector]
         public int[] cascadesRefreshWaitFrames = new int[NumberOfCascades];
+
         [HideInInspector]
         public float[] cascadesRefreshWaitSeconds = new float[NumberOfCascades];
-        private int[] _framesCounterCascades = new int[NumberOfCascades];
-        private float[] _secondsCounterCascades = new float[NumberOfCascades];
+
+        private readonly int[] _framesCounterCascades = new int[NumberOfCascades];
+        private readonly float[] _secondsCounterCascades = new float[NumberOfCascades];
         private const int NumberOfCascades = 4;
 
         // Subshadows refresh counter variables
         [HideInInspector]
         public int[] subshadowsRefreshWaitFrames = new int[NumberOfSubshadows];
+
         [HideInInspector]
         public float[] subshadowsRefreshWaitSeconds = new float[NumberOfSubshadows];
-        private int[] _framesCounterSubshadows = new int[NumberOfSubshadows];
-        private float[] _secondsCounterSubshadows = new float[NumberOfSubshadows];
+
+        private readonly int[] _framesCounterSubshadows = new int[NumberOfSubshadows];
+        private readonly float[] _secondsCounterSubshadows = new float[NumberOfSubshadows];
         private const int NumberOfSubshadows = 6;
 
         private void Start()
@@ -70,7 +80,6 @@ namespace DaftAppleGames.Lighting
             if (mainCamera == null)
             {
                 Debug.LogError("There's no Camera GameObject with the MainCamera tag in the scene!");
-                return;
             }
         }
 
@@ -88,6 +97,8 @@ namespace DaftAppleGames.Lighting
                 case ShadowMapToRefresh.Subshadows:
                     UpdateSubshadows();
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             // Call this method if Update On Camera Movement is enabled
@@ -130,6 +141,7 @@ namespace DaftAppleGames.Lighting
                         _hdLight.RequestShadowMapRendering();
                         _framesCounterFullShadowMap = 0;
                     }
+
                     break;
                 case CounterMode.Seconds:
                     _secondsCounterFullShadowMap += Time.deltaTime;
@@ -138,7 +150,10 @@ namespace DaftAppleGames.Lighting
                         _hdLight.RequestShadowMapRendering();
                         _secondsCounterFullShadowMap = 0;
                     }
+
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -152,25 +167,33 @@ namespace DaftAppleGames.Lighting
                     {
                         _framesCounterCascades[i]++;
 
-                        if (cascadesRefreshWaitFrames[i] > 0 && _framesCounterCascades[i] >= cascadesRefreshWaitFrames[i])
+                        if (cascadesRefreshWaitFrames[i] <= 0 || _framesCounterCascades[i] < cascadesRefreshWaitFrames[i])
                         {
-                            _hdLight.RequestSubShadowMapRendering(i);
-                            _framesCounterCascades[i] = 0;
+                            continue;
                         }
+
+                        _hdLight.RequestSubShadowMapRendering(i);
+                        _framesCounterCascades[i] = 0;
                     }
+
                     break;
                 case CounterMode.Seconds:
                     for (int i = 0; i < _secondsCounterCascades.Length; i++)
                     {
                         _secondsCounterCascades[i] += Time.deltaTime;
 
-                        if (cascadesRefreshWaitSeconds[i] > 0 && _secondsCounterCascades[i] >= cascadesRefreshWaitSeconds[i])
+                        if (!(cascadesRefreshWaitSeconds[i] > 0) || !(_secondsCounterCascades[i] >= cascadesRefreshWaitSeconds[i]))
                         {
-                            _hdLight.RequestSubShadowMapRendering(i);
-                            _secondsCounterCascades[i] = 0;
+                            continue;
                         }
+
+                        _hdLight.RequestSubShadowMapRendering(i);
+                        _secondsCounterCascades[i] = 0;
                     }
+
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -184,38 +207,50 @@ namespace DaftAppleGames.Lighting
                     {
                         _framesCounterSubshadows[i]++;
 
-                        if (subshadowsRefreshWaitFrames[i] > 0 && _framesCounterSubshadows[i] >= subshadowsRefreshWaitFrames[i])
+                        if (subshadowsRefreshWaitFrames[i] <= 0 || _framesCounterSubshadows[i] < subshadowsRefreshWaitFrames[i])
                         {
-                            _hdLight.RequestSubShadowMapRendering(i);
-                            _framesCounterSubshadows[i] = 0;
+                            continue;
                         }
+
+                        _hdLight.RequestSubShadowMapRendering(i);
+                        _framesCounterSubshadows[i] = 0;
                     }
+
                     break;
                 case CounterMode.Seconds:
                     for (int i = 0; i < _secondsCounterSubshadows.Length; i++)
                     {
                         _secondsCounterSubshadows[i] += Time.deltaTime;
 
-                        if (subshadowsRefreshWaitSeconds[i] > 0 && _secondsCounterSubshadows[i] >= subshadowsRefreshWaitSeconds[i])
+                        if (!(subshadowsRefreshWaitSeconds[i] > 0) || !(_secondsCounterSubshadows[i] >= subshadowsRefreshWaitSeconds[i]))
                         {
-                            _hdLight.RequestSubShadowMapRendering(i);
-                            _secondsCounterSubshadows[i] = 0;
+                            continue;
                         }
+
+                        _hdLight.RequestSubShadowMapRendering(i);
+                        _secondsCounterSubshadows[i] = 0;
                     }
+
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
         private void UpdateOnCameraMove()
         {
-            if (cameraToTrack != null)
+            if (cameraToTrack == null)
             {
-                if (cameraToTrack.transform.hasChanged)
-                {
-                    _hdLight.RequestShadowMapRendering();
-                    cameraToTrack.transform.hasChanged = false;
-                }
+                return;
             }
+
+            if (!cameraToTrack.transform.hasChanged)
+            {
+                return;
+            }
+
+            _hdLight.RequestShadowMapRendering();
+            cameraToTrack.transform.hasChanged = false;
         }
 
 #if UNITY_EDITOR
@@ -261,6 +296,7 @@ namespace DaftAppleGames.Lighting
                         {
                             DrawShadowMapGUIFloatField("Update Interval", ref myScript.fullShadowMapRefreshWaitSeconds);
                         }
+
                         break;
                     case ShadowMapToRefresh.Cascades:
                         if (myScript.counterMode == CounterMode.Frames)
@@ -277,6 +313,7 @@ namespace DaftAppleGames.Lighting
                             DrawShadowMapGUIFloatField("Cascade 3 Update Interval", ref myScript.cascadesRefreshWaitSeconds[2]);
                             DrawShadowMapGUIFloatField("Cascade 4 Update Interval", ref myScript.cascadesRefreshWaitSeconds[3]);
                         }
+
                         break;
                     case ShadowMapToRefresh.Subshadows:
                         if (myScript.counterMode == CounterMode.Frames)
@@ -297,7 +334,10 @@ namespace DaftAppleGames.Lighting
                             DrawShadowMapGUIFloatField("Subshadow 5 Update Interval", ref myScript.subshadowsRefreshWaitSeconds[4]);
                             DrawShadowMapGUIFloatField("Subshadow 6 Update Interval", ref myScript.subshadowsRefreshWaitSeconds[5]);
                         }
+
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
 

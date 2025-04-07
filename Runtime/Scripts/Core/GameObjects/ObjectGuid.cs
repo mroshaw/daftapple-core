@@ -10,10 +10,7 @@ namespace DaftAppleGames.GameObjects
     [ExecuteInEditMode]
     public class ObjectGuid : MonoBehaviour
     {
-        [SerializeField] private string guid;
-        private string _guid;
-
-        public string Guid => _guid;
+        public string Guid { get; private set; }
 
         private void OnEnable()
         {
@@ -23,10 +20,9 @@ namespace DaftAppleGames.GameObjects
         [Button("Generate Now")]
         private void Generate()
         {
-            if (string.IsNullOrEmpty(_guid))
+            if (string.IsNullOrEmpty(Guid))
             {
-                _guid = System.Guid.NewGuid().ToString();
-                guid = _guid;
+                Guid = System.Guid.NewGuid().ToString();
             }
         }
     }

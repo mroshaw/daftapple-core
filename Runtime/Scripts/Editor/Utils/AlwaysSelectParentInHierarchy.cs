@@ -11,7 +11,7 @@ namespace DaftAppleGames.Editor.Utils
     [InitializeOnLoad]
     public class AlwaysSelectParentInHierarchy
     {
-        private static bool _isEnabled = false;
+        private static bool _isEnabled;
 
         static AlwaysSelectParentInHierarchy()
         {

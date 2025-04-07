@@ -12,10 +12,10 @@ namespace DaftAppleGames.Editor
         [SerializeField] private PackageContents packageContents;
         private const string BaseInstallFolderName = "DaftAppleGames";
 
-        private string RelativePackageInstallFolder => Path.Combine("Assets", BaseInstallFolderName, "Packages");
-        private string AbsolutePackageInstallFolder => Path.Combine(Application.dataPath, BaseInstallFolderName, "Packages");
-        private string AbsoluteBaseInstallFolder => Path.Combine("Assets", BaseInstallFolderName);
-        private string RelativeBaseInstallFolder => Path.Combine(Application.dataPath, BaseInstallFolderName);
+        private static string RelativePackageInstallFolder => Path.Combine("Assets", BaseInstallFolderName, "Packages");
+        private static string AbsolutePackageInstallFolder => Path.Combine(Application.dataPath, BaseInstallFolderName, "Packages");
+        private static string AbsoluteBaseInstallFolder => Path.Combine("Assets", BaseInstallFolderName);
+        private static string RelativeBaseInstallFolder => Path.Combine(Application.dataPath, BaseInstallFolderName);
 
         private Button _installButton;
         private Button _unInstallButton;
@@ -92,21 +92,13 @@ namespace DaftAppleGames.Editor
         {
             if (!force && _localPackageCopy.IsAlreadyInstalled())
             {
-                log.Log(LogLevel.Error, "Already installed!");
+                Log.Log(LogLevel.Error, "Already installed!");
                 return;
             }
 
-            log.Log(LogLevel.Info, "Installing... ", true);
-            bool installResult = _localPackageCopy.Install(log);
-            if (installResult)
-            {
-                log.Log(LogLevel.Info, "Install Complete!", true);
-            }
-            else
-            {
-                log.Log(LogLevel.Error, "Install Failed! Check logs!", true);
-            }
-
+            Log.Log(LogLevel.Info, "Installing... ", true);
+            bool installResult = _localPackageCopy.Install(Log);
+            Log.Log(LogLevel.Info, installResult ? "Install complete!" : "Install failed! Check logs!", true);
             CustomEditorTools.SaveChangesToAsset(_localPackageCopy);
         }
 
@@ -114,24 +106,24 @@ namespace DaftAppleGames.Editor
         {
             if (!_localPackageCopy.IsAlreadyInstalled())
             {
-                log.Log(LogLevel.Error, $"Package is not installed!!");
+                Log.Log(LogLevel.Error, "Package is not installed!!");
             }
 
-            log.Log(LogLevel.Info, $"Uninstalling...", true);
-            bool installResult = _localPackageCopy.UnInstall(log);
-            log.Log(LogLevel.Info, $"Uninstall Complete!", true);
+            Log.Log(LogLevel.Info, "Uninstalling...", true);
+            bool installResult = _localPackageCopy.UnInstall(Log);
+            Log.Log(LogLevel.Info, installResult ? "Uninstall complete!" : "Install failed! Check logs!", true);
         }
 
         private void ReInstall()
         {
             if (!_localPackageCopy.IsAlreadyInstalled())
             {
-                log.Log(LogLevel.Error, $"Package is not installed!!");
+                Log.Log(LogLevel.Error, "Package is not installed!!");
             }
 
-            log.Log(LogLevel.Info, $"Reinstalling...", true);
+            Log.Log(LogLevel.Info, "Reinstalling...", true);
             Install(true);
-            log.Log(LogLevel.Info, $"Reinstall Complete!", true);
+            Log.Log(LogLevel.Info, "Reinstall Complete!", true);
         }
 
         private void SetButtonState(bool installedState)
