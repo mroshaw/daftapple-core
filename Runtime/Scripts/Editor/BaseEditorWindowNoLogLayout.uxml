@@ -5,17 +5,7 @@
             <engine:Label name="TitleLabel" binding-path="titleText" text="Title Text" class="HeadingText" />
             <engine:Label name="IntroText" binding-path="introText" text="Intro Test" class="IntroText" />
             <engine:VisualElement name="CustomEditorContainer" class="CustomContentContainer" style="flex-shrink: 0;" />
-        </engine:VisualElement>
-        <engine:VisualElement name="LoggingContainer" style="flex-grow: 1;">
-            <engine:Label text="Log:" name="LogLabel" class="Label" />
-            <engine:TextField name="LogText" binding-path="logText" multiline="true" readonly="true" vertical-scroller-visibility="AlwaysVisible" class="LogText" style="flex-direction: row; flex-shrink: 0; flex-grow: 1; bottom: 40px; top: 0;" />
-            <engine:VisualElement name="LoggingControlsContainer">
-                <engine:VisualElement name="LogCheckBoxContainer" class="HorizontalAlignContainer">
-                    <engine:Toggle label="Detailed logs:" name="DetailedLoggingToggle" class="Label" />
-                    <engine:Toggle label="Log to Console:" name="LogToConsoleToggle" class="Label" />
-                </engine:VisualElement>
-                <engine:Button text="Clear Log" name="ClearLogButton" class="Button" />
-            </engine:VisualElement>
+            <engine:Toggle label="Detailed Logging:" name="DetailedLoggingToggle" class="Label" />
         </engine:VisualElement>
     </engine:VisualElement>
 </engine:UXML>
