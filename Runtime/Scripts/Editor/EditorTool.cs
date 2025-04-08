@@ -1,10 +1,7 @@
 using System;
-using DaftAppleGames.Darskerry.Core.Buildings;
-using DaftAppleGames.Extensions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Object = UnityEngine.Object;
 
 namespace DaftAppleGames.Editor
 {
