@@ -32,7 +32,7 @@ namespace DaftAppleGames.Editor
             VisualElement toolsButtonsContainer = CustomEditorRootVisualElement.Q<VisualElement>("ToolButtonsContainer");
             toolsButtonsContainer.Add(editorToolsList.GetUserInterface(Log));
 
-            selectedGameObject = null;
+            selectedGameObject = Selection.activeGameObject;
 
             if (editorSettings && editorToolsList)
             {

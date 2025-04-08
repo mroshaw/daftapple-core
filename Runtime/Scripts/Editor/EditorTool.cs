@@ -1,6 +1,7 @@
 using System;
 using DaftAppleGames.Darskerry.Core.Buildings;
 using DaftAppleGames.Extensions;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
@@ -85,7 +86,17 @@ namespace DaftAppleGames.Editor
                 return;
             }
 
-            RunTool(ParentToolsList.SelectedGameObject, ParentToolsList.EditorSettings);
+            // Set up Undo
+            int undoGroup = Undo.GetCurrentGroup();
+            string undoGroupName = $"Run {GetToolName()}";
+            Undo.SetCurrentGroupName(undoGroupName);
+            Undo.RegisterCompleteObjectUndo(ParentToolsList.SelectedGameObject, undoGroupName);
+
+            // Run the tool
+            RunTool(ParentToolsList.SelectedGameObject, ParentToolsList.EditorSettings, undoGroupName);
+
+            // Collapse all undo operations into a single entry
+            Undo.CollapseUndoOperations(undoGroup);
         }
 
         /// <summary>
@@ -104,6 +115,11 @@ namespace DaftAppleGames.Editor
         }
 
         /// <summary>
+        /// Returns the name of the tool for use in debugging, undo etc.
+        /// </summary>
+        protected abstract string GetToolName();
+
+        /// <summary>
         /// Returns true if the tool is supported in the current environment. For example, depending on the current Render Pipeline
         /// </summary>
         /// <returns></returns>
@@ -117,6 +133,6 @@ namespace DaftAppleGames.Editor
         /// <summary>
         /// Runs the tool, on the basis that inputs are valid
         /// </summary>
-        protected abstract void RunTool(GameObject selectedGameObject, ButtonWizardEditorSettings editorSettings);
+        protected abstract void RunTool(GameObject selectedGameObject, ButtonWizardEditorSettings editorSettings, string undoGroupName);
     }
 }
