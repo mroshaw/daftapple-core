@@ -26,7 +26,7 @@ namespace DaftAppleGames.Editor.Attributes
             EditorGUI.BeginChangeCheck();
             bool enabled = PropertyUtility.IsEnabled(property);
 
-            using (new EditorGUI.DisabledScope(!enabled))
+            using (new EditorGUI.DisabledScope(disabled: !enabled))
             {
                 OnGUI_Internal(rect, property, PropertyUtility.GetLabel(property));
             }
@@ -40,7 +40,7 @@ namespace DaftAppleGames.Editor.Attributes
 
         protected abstract void OnGUI_Internal(Rect rect, SerializedProperty property, GUIContent label);
 
-        public sealed override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        sealed override public float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             bool visible = PropertyUtility.IsVisible(property);
             if (!visible)
@@ -53,7 +53,7 @@ namespace DaftAppleGames.Editor.Attributes
 
         protected virtual float GetPropertyHeight_Internal(SerializedProperty property, GUIContent label)
         {
-            return EditorGUI.GetPropertyHeight(property, true);
+            return EditorGUI.GetPropertyHeight(property, includeChildren: true);
         }
 
         protected float GetPropertyHeight(SerializedProperty property)
@@ -64,26 +64,26 @@ namespace DaftAppleGames.Editor.Attributes
                 return specialCaseAttribute.GetDrawer().GetPropertyHeight(property);
             }
 
-            return EditorGUI.GetPropertyHeight(property, true);
+            return EditorGUI.GetPropertyHeight(property, includeChildren: true);
         }
 
-        protected virtual float GetHelpBoxHeight()
+        public virtual float GetHelpBoxHeight()
         {
             return EditorGUIUtility.singleLineHeight * 2.0f;
         }
 
-        protected void DrawDefaultPropertyAndHelpBox(Rect rect, SerializedProperty property, string message, MessageType messageType)
+        public void DrawDefaultPropertyAndHelpBox(Rect rect, SerializedProperty property, string message, MessageType messageType)
         {
             float indentLength = DaftAppleEditorGUI.GetIndentLength(rect);
-            Rect helpBoxRect = new(
+            Rect helpBoxRect = new Rect(
                 rect.x + indentLength,
                 rect.y,
                 rect.width - indentLength,
                 GetHelpBoxHeight());
 
-            DaftAppleEditorGUI.HelpBox(helpBoxRect, message, MessageType.Warning, property.serializedObject.targetObject);
+            DaftAppleEditorGUI.HelpBox(helpBoxRect, message, MessageType.Warning, context: property.serializedObject.targetObject);
 
-            Rect propertyRect = new(
+            Rect propertyRect = new Rect(
                 rect.x,
                 rect.y + GetHelpBoxHeight(),
                 rect.width,

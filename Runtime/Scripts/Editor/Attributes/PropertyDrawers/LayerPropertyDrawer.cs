@@ -40,7 +40,7 @@ namespace DaftAppleGames.Editor.Attributes
             EditorGUI.EndProperty();
         }
 
-        private static string[] GetLayers()
+        private string[] GetLayers()
         {
             return UnityEditorInternal.InternalEditorUtility.layers;
         }
@@ -63,13 +63,11 @@ namespace DaftAppleGames.Editor.Attributes
             string layerName = LayerMask.LayerToName(property.intValue);
             for (int i = 0; i < layers.Length; i++)
             {
-                if (!layerName.Equals(layers[i], StringComparison.Ordinal))
+                if (layerName.Equals(layers[i], StringComparison.Ordinal))
                 {
-                    continue;
+                    index = i;
+                    break;
                 }
-
-                index = i;
-                break;
             }
 
             int newIndex = EditorGUI.Popup(rect, label.text, index, layers);
@@ -84,7 +82,7 @@ namespace DaftAppleGames.Editor.Attributes
 
         private static int IndexOf(string[] layers, string layer)
         {
-            int index = Array.IndexOf(layers, layer);
+            var index = Array.IndexOf(layers, layer);
             return Mathf.Clamp(index, 0, layers.Length - 1);
         }
     }

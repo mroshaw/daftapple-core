@@ -19,7 +19,7 @@ namespace DaftAppleGames.Editor.Attributes
 
             // Validate
             ValidatorAttribute[] validatorAttributes = PropertyUtility.GetAttributes<ValidatorAttribute>(property);
-            foreach (ValidatorAttribute validatorAttribute in validatorAttributes)
+            foreach (var validatorAttribute in validatorAttributes)
             {
                 validatorAttribute.GetValidator().ValidateProperty(property);
             }
@@ -28,7 +28,7 @@ namespace DaftAppleGames.Editor.Attributes
             EditorGUI.BeginChangeCheck();
             bool enabled = PropertyUtility.IsEnabled(property);
 
-            using (new EditorGUI.DisabledScope(!enabled))
+            using (new EditorGUI.DisabledScope(disabled: !enabled))
             {
                 OnGUI_Internal(rect, property, PropertyUtility.GetLabel(property));
             }
@@ -51,19 +51,25 @@ namespace DaftAppleGames.Editor.Attributes
 
     public static class SpecialCaseDrawerAttributeExtensions
     {
-        private static readonly Dictionary<Type, SpecialCasePropertyDrawerBase> DrawersByAttributeType;
+        private static Dictionary<Type, SpecialCasePropertyDrawerBase> _drawersByAttributeType;
 
         static SpecialCaseDrawerAttributeExtensions()
         {
-            DrawersByAttributeType = new Dictionary<Type, SpecialCasePropertyDrawerBase>
-            {
-                [typeof(ReorderableListAttribute)] = ReorderableListPropertyDrawer.Instance
-            };
+            _drawersByAttributeType = new Dictionary<Type, SpecialCasePropertyDrawerBase>();
+            _drawersByAttributeType[typeof(ReorderableListAttribute)] = ReorderableListPropertyDrawer.Instance;
         }
 
         public static SpecialCasePropertyDrawerBase GetDrawer(this SpecialCaseDrawerAttribute attr)
         {
-            return DrawersByAttributeType.GetValueOrDefault(attr.GetType());
+            SpecialCasePropertyDrawerBase drawer;
+            if (_drawersByAttributeType.TryGetValue(attr.GetType(), out drawer))
+            {
+                return drawer;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

@@ -14,35 +14,28 @@ namespace DaftAppleGames.Editor.Attributes
 
             MethodInfo validationCallback = ReflectionUtility.GetMethod(target, validateInputAttribute.CallbackName);
 
-            if (validationCallback == null ||
-                validationCallback.ReturnType != typeof(bool))
+            if (validationCallback != null &&
+                validationCallback.ReturnType == typeof(bool))
             {
-                return;
-            }
+                ParameterInfo[] callbackParameters = validationCallback.GetParameters();
 
-            ParameterInfo[] callbackParameters = validationCallback.GetParameters();
-
-            switch (callbackParameters.Length)
-            {
-                case 0:
+                if (callbackParameters.Length == 0)
                 {
                     if (!(bool)validationCallback.Invoke(target, null))
                     {
                         if (string.IsNullOrEmpty(validateInputAttribute.Message))
                         {
                             DaftAppleEditorGUI.HelpBox_Layout(
-                                property.name + " is not valid", MessageType.Error, property.serializedObject.targetObject);
+                                property.name + " is not valid", MessageType.Error, context: property.serializedObject.targetObject);
                         }
                         else
                         {
                             DaftAppleEditorGUI.HelpBox_Layout(
-                                validateInputAttribute.Message, MessageType.Error, property.serializedObject.targetObject);
+                                validateInputAttribute.Message, MessageType.Error, context: property.serializedObject.targetObject);
                         }
                     }
-
-                    break;
                 }
-                case 1:
+                else if (callbackParameters.Length == 1)
                 {
                     FieldInfo fieldInfo = ReflectionUtility.GetField(target, property.name);
                     Type fieldType = fieldInfo.FieldType;
@@ -50,36 +43,33 @@ namespace DaftAppleGames.Editor.Attributes
 
                     if (fieldType == parameterType)
                     {
-                        if (!(bool)validationCallback.Invoke(target, new[] { fieldInfo.GetValue(target) }))
+                        if (!(bool)validationCallback.Invoke(target, new object[] { fieldInfo.GetValue(target) }))
                         {
                             if (string.IsNullOrEmpty(validateInputAttribute.Message))
                             {
                                 DaftAppleEditorGUI.HelpBox_Layout(
-                                    property.name + " is not valid", MessageType.Error, property.serializedObject.targetObject);
+                                    property.name + " is not valid", MessageType.Error, context: property.serializedObject.targetObject);
                             }
                             else
                             {
                                 DaftAppleEditorGUI.HelpBox_Layout(
-                                    validateInputAttribute.Message, MessageType.Error, property.serializedObject.targetObject);
+                                    validateInputAttribute.Message, MessageType.Error, context: property.serializedObject.targetObject);
                             }
                         }
                     }
                     else
                     {
                         string warning = "The field type is not the same as the callback's parameter type";
-                        DaftAppleEditorGUI.HelpBox_Layout(warning, MessageType.Warning, property.serializedObject.targetObject);
+                        DaftAppleEditorGUI.HelpBox_Layout(warning, MessageType.Warning, context: property.serializedObject.targetObject);
                     }
-
-                    break;
                 }
-                default:
+                else
                 {
                     string warning =
                         validateInputAttribute.GetType().Name +
                         " needs a callback with boolean return type and an optional single parameter of the same type as the field";
 
-                    DaftAppleEditorGUI.HelpBox_Layout(warning, MessageType.Warning, property.serializedObject.targetObject);
-                    break;
+                    DaftAppleEditorGUI.HelpBox_Layout(warning, MessageType.Warning, context: property.serializedObject.targetObject);
                 }
             }
         }

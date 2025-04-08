@@ -10,7 +10,7 @@ namespace DaftAppleGames.Editor.Attributes
     {
         protected override float GetPropertyHeight_Internal(SerializedProperty property, GUIContent label)
         {
-            return property.propertyType == SerializedPropertyType.String
+            return (property.propertyType == SerializedPropertyType.String)
                 ? GetPropertyHeight(property)
                 : GetPropertyHeight(property) + GetHelpBoxHeight();
         }
@@ -22,11 +22,9 @@ namespace DaftAppleGames.Editor.Attributes
             if (property.propertyType == SerializedPropertyType.String)
             {
                 // generate the taglist + custom tags
-                List<string> tagList = new()
-                {
-                    "(None)",
-                    "Untagged"
-                };
+                List<string> tagList = new List<string>();
+                tagList.Add("(None)");
+                tagList.Add("Untagged");
                 tagList.AddRange(UnityEditorInternal.InternalEditorUtility.tags);
 
                 string propertyString = property.stringValue;
@@ -35,13 +33,11 @@ namespace DaftAppleGames.Editor.Attributes
                 // we skip index 0 as that is a special custom case
                 for (int i = 1; i < tagList.Count; i++)
                 {
-                    if (!tagList[i].Equals(propertyString, System.StringComparison.Ordinal))
+                    if (tagList[i].Equals(propertyString, System.StringComparison.Ordinal))
                     {
-                        continue;
+                        index = i;
+                        break;
                     }
-
-                    index = i;
-                    break;
                 }
 
                 // Draw the popup box with the current selected index
@@ -57,7 +53,7 @@ namespace DaftAppleGames.Editor.Attributes
             }
             else
             {
-                string message = $"{nameof(TagSelectorAttribute)} supports only string fields";
+                string message = string.Format("{0} supports only string fields", typeof(TagSelectorAttribute).Name);
                 DrawDefaultPropertyAndHelpBox(rect, property, message, MessageType.Warning);
             }
 

@@ -21,11 +21,13 @@ namespace DaftAppleGames.Editor.Attributes
                 bool enabled = PropertyUtility.GetConditionsFlag(conditionValues, enableIfAttribute.ConditionOperator, enableIfAttribute.Inverted);
                 return enabled;
             }
+            else
+            {
+                string message = enableIfAttribute.GetType().Name + " needs a valid boolean condition field, property or method name to work";
+                Debug.LogWarning(message, target);
 
-            string message = enableIfAttribute.GetType().Name + " needs a valid boolean condition field, property or method name to work";
-            Debug.LogWarning(message, target);
-
-            return false;
+                return false;
+            }
         }
 
         public static bool IsVisible(Object target, MethodInfo method)
@@ -42,11 +44,13 @@ namespace DaftAppleGames.Editor.Attributes
                 bool enabled = PropertyUtility.GetConditionsFlag(conditionValues, showIfAttribute.ConditionOperator, showIfAttribute.Inverted);
                 return enabled;
             }
+            else
+            {
+                string message = showIfAttribute.GetType().Name + " needs a valid boolean condition field, property or method name to work";
+                Debug.LogWarning(message, target);
 
-            string message = showIfAttribute.GetType().Name + " needs a valid boolean condition field, property or method name to work";
-            Debug.LogWarning(message, target);
-
-            return false;
+                return false;
+            }
         }
     }
 }

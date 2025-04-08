@@ -14,7 +14,7 @@ namespace DaftAppleGames.Editor.Attributes
         public const float IndentLength = 15.0f;
         public const float HorizontalSpacing = 2.0f;
 
-        private static readonly GUIStyle ButtonStyle = new(GUI.skin.button) { richText = true };
+        private static GUIStyle _buttonStyle = new GUIStyle(GUI.skin.button) { richText = true };
 
         private delegate void PropertyFieldFunction(Rect rect, SerializedProperty property, GUIContent label, bool includeChildren);
 
@@ -25,7 +25,7 @@ namespace DaftAppleGames.Editor.Attributes
 
         public static void PropertyField_Layout(SerializedProperty property, bool includeChildren)
         {
-            Rect dummyRect = new();
+            Rect dummyRect = new Rect();
             PropertyField_Implementation(dummyRect, property, includeChildren, DrawPropertyField_Layout);
         }
 
@@ -57,7 +57,7 @@ namespace DaftAppleGames.Editor.Attributes
 
                 // Validate
                 ValidatorAttribute[] validatorAttributes = PropertyUtility.GetAttributes<ValidatorAttribute>(property);
-                foreach (ValidatorAttribute validatorAttribute in validatorAttributes)
+                foreach (var validatorAttribute in validatorAttributes)
                 {
                     validatorAttribute.GetValidator().ValidateProperty(property);
                 }
@@ -66,7 +66,7 @@ namespace DaftAppleGames.Editor.Attributes
                 EditorGUI.BeginChangeCheck();
                 bool enabled = PropertyUtility.IsEnabled(property);
 
-                using (new EditorGUI.DisabledScope(!enabled))
+                using (new EditorGUI.DisabledScope(disabled: !enabled))
                 {
                     propertyFieldFunction.Invoke(rect, property, PropertyUtility.GetLabel(property), includeChildren);
                 }
@@ -122,16 +122,14 @@ namespace DaftAppleGames.Editor.Attributes
             object newValue = values[newIndex];
 
             object dropdownValue = dropdownField.GetValue(target);
-            if (dropdownValue != null && dropdownValue.Equals(newValue))
+            if (dropdownValue == null || !dropdownValue.Equals(newValue))
             {
-                return;
+                Undo.RecordObject(serializedObject.targetObject, "Dropdown");
+
+                // TODO: Problem with structs, because they are value type.
+                // The solution is to make boxing/unboxing but unfortunately I don't know the compile time type of the target object
+                dropdownField.SetValue(target, newValue);
             }
-
-            Undo.RecordObject(serializedObject.targetObject, "Dropdown");
-
-            // TODO: Problem with structs, because they are value type.
-            // The solution is to make boxing/unboxing but unfortunately I don't know the compile time type of the target object
-            dropdownField.SetValue(target, newValue);
         }
 
         public static void Button(UnityEngine.Object target, MethodInfo methodInfo)
@@ -152,20 +150,21 @@ namespace DaftAppleGames.Editor.Attributes
                 EButtonEnableMode mode = buttonAttribute.SelectedEnableMode;
                 buttonEnabled &=
                     mode == EButtonEnableMode.Always ||
-                    (mode == EButtonEnableMode.Editor && !Application.isPlaying) ||
-                    (mode == EButtonEnableMode.Playmode && Application.isPlaying);
+                    mode == EButtonEnableMode.Editor && !Application.isPlaying ||
+                    mode == EButtonEnableMode.Playmode && Application.isPlaying;
 
                 bool methodIsCoroutine = methodInfo.ReturnType == typeof(IEnumerator);
                 if (methodIsCoroutine)
                 {
-                    buttonEnabled &= Application.isPlaying;
+                    buttonEnabled &= (Application.isPlaying ? true : false);
                 }
 
                 EditorGUI.BeginDisabledGroup(!buttonEnabled);
 
-                if (GUILayout.Button(buttonText, ButtonStyle))
+                if (GUILayout.Button(buttonText, _buttonStyle))
                 {
                     object[] defaultParams = methodInfo.GetParameters().Select(p => p.DefaultValue).ToArray();
+                    IEnumerator methodResult = methodInfo.Invoke(target, defaultParams) as IEnumerator;
 
                     if (!Application.isPlaying)
                     {
@@ -173,11 +172,18 @@ namespace DaftAppleGames.Editor.Attributes
                         EditorUtility.SetDirty(target);
 
                         PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
-                        // Normal scene
-                        // Prefab mode
-                        EditorSceneManager.MarkSceneDirty(stage != null ? stage.scene : EditorSceneManager.GetActiveScene());
+                        if (stage != null)
+                        {
+                            // Prefab mode
+                            EditorSceneManager.MarkSceneDirty(stage.scene);
+                        }
+                        else
+                        {
+                            // Normal scene
+                            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                        }
                     }
-                    else if (methodInfo.Invoke(target, defaultParams) is IEnumerator methodResult && target is MonoBehaviour behaviour)
+                    else if (methodResult != null && target is MonoBehaviour behaviour)
                     {
                         behaviour.StartCoroutine(methodResult);
                     }
@@ -187,8 +193,8 @@ namespace DaftAppleGames.Editor.Attributes
             }
             else
             {
-                string warning = nameof(ButtonAttribute) + " works only on methods with no parameters";
-                HelpBox_Layout(warning, MessageType.Warning, target, true);
+                string warning = typeof(ButtonAttribute).Name + " works only on methods with no parameters";
+                HelpBox_Layout(warning, MessageType.Warning, context: target, logToConsole: true);
             }
         }
 
@@ -198,14 +204,13 @@ namespace DaftAppleGames.Editor.Attributes
 
             if (value == null)
             {
-                string warning =
-                    $"{ObjectNames.NicifyVariableName(property.Name)} is null. {nameof(ShowNativePropertyAttribute)} doesn't support reference types with null value";
-                HelpBox_Layout(warning, MessageType.Warning, target);
+                string warning = string.Format("{0} is null. {1} doesn't support reference types with null value", ObjectNames.NicifyVariableName(property.Name), typeof(ShowNativePropertyAttribute).Name);
+                HelpBox_Layout(warning, MessageType.Warning, context: target);
             }
             else if (!Field_Layout(value, ObjectNames.NicifyVariableName(property.Name)))
             {
-                string warning = $"{nameof(ShowNativePropertyAttribute)} doesn't support {property.PropertyType.Name} types";
-                HelpBox_Layout(warning, MessageType.Warning, target);
+                string warning = string.Format("{0} doesn't support {1} types", typeof(ShowNativePropertyAttribute).Name, property.PropertyType.Name);
+                HelpBox_Layout(warning, MessageType.Warning, context: target);
             }
         }
 
@@ -215,14 +220,13 @@ namespace DaftAppleGames.Editor.Attributes
 
             if (value == null)
             {
-                string warning =
-                    $"{ObjectNames.NicifyVariableName(field.Name)} is null. {nameof(ShowNonSerializedFieldAttribute)} doesn't support reference types with null value";
-                HelpBox_Layout(warning, MessageType.Warning, target);
+                string warning = string.Format("{0} is null. {1} doesn't support reference types with null value", ObjectNames.NicifyVariableName(field.Name), typeof(ShowNonSerializedFieldAttribute).Name);
+                HelpBox_Layout(warning, MessageType.Warning, context: target);
             }
             else if (!Field_Layout(value, ObjectNames.NicifyVariableName(field.Name)))
             {
-                string warning = $"{nameof(ShowNonSerializedFieldAttribute)} doesn't support {field.FieldType.Name} types";
-                HelpBox_Layout(warning, MessageType.Warning, target);
+                string warning = string.Format("{0} doesn't support {1} types", typeof(ShowNonSerializedFieldAttribute).Name, field.FieldType.Name);
+                HelpBox_Layout(warning, MessageType.Warning, context: target);
             }
         }
 
@@ -252,9 +256,9 @@ namespace DaftAppleGames.Editor.Attributes
             }
         }
 
-        private static bool Field_Layout(object value, string label)
+        public static bool Field_Layout(object value, string label)
         {
-            using (new EditorGUI.DisabledScope(true))
+            using (new EditorGUI.DisabledScope(disabled: true))
             {
                 bool isDrawn = true;
                 Type valueType = value.GetType();
@@ -343,7 +347,7 @@ namespace DaftAppleGames.Editor.Attributes
                 {
                     EditorGUILayout.EnumPopup(label, (Enum)value);
                 }
-                else if (valueType.BaseType == typeof(TypeInfo))
+                else if (valueType.BaseType == typeof(System.Reflection.TypeInfo))
                 {
                     EditorGUILayout.TextField(label, value.ToString());
                 }
@@ -370,8 +374,6 @@ namespace DaftAppleGames.Editor.Attributes
                 case MessageType.Error:
                     Debug.LogError(message, context);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
     }

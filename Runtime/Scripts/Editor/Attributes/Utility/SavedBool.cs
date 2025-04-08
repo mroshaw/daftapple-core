@@ -9,7 +9,10 @@ namespace DaftAppleGames.Editor.Attributes
 
         public bool Value
         {
-            get => _value;
+            get
+            {
+                return _value;
+            }
             set
             {
                 if (_value == value)

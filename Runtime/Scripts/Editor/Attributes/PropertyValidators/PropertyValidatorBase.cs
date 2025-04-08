@@ -12,22 +12,28 @@ namespace DaftAppleGames.Editor.Attributes
 
     public static class ValidatorAttributeExtensions
     {
-        private static readonly Dictionary<Type, PropertyValidatorBase> ValidatorsByAttributeType;
+        private static Dictionary<Type, PropertyValidatorBase> _validatorsByAttributeType;
 
         static ValidatorAttributeExtensions()
         {
-            ValidatorsByAttributeType = new Dictionary<Type, PropertyValidatorBase>
-            {
-                [typeof(MinValueAttribute)] = new MinValuePropertyValidator(),
-                [typeof(MaxValueAttribute)] = new MaxValuePropertyValidator(),
-                [typeof(RequiredAttribute)] = new RequiredPropertyValidator(),
-                [typeof(ValidateInputAttribute)] = new ValidateInputPropertyValidator()
-            };
+            _validatorsByAttributeType = new Dictionary<Type, PropertyValidatorBase>();
+            _validatorsByAttributeType[typeof(MinValueAttribute)] = new MinValuePropertyValidator();
+            _validatorsByAttributeType[typeof(MaxValueAttribute)] = new MaxValuePropertyValidator();
+            _validatorsByAttributeType[typeof(RequiredAttribute)] = new RequiredPropertyValidator();
+            _validatorsByAttributeType[typeof(ValidateInputAttribute)] = new ValidateInputPropertyValidator();
         }
 
         public static PropertyValidatorBase GetValidator(this ValidatorAttribute attr)
         {
-            return ValidatorsByAttributeType.GetValueOrDefault(attr.GetType());
+            PropertyValidatorBase validator;
+            if (_validatorsByAttributeType.TryGetValue(attr.GetType(), out validator))
+            {
+                return validator;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
