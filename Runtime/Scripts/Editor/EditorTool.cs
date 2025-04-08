@@ -1,4 +1,6 @@
 using System;
+using DaftAppleGames.BuildingTools;
+using DaftAppleGames.Extensions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -83,17 +85,25 @@ namespace DaftAppleGames.Editor
                 return;
             }
 
-            // Set up Undo
             int undoGroup = Undo.GetCurrentGroup();
             string undoGroupName = $"Run {GetToolName()}";
-            Undo.SetCurrentGroupName(undoGroupName);
-            Undo.RegisterCompleteObjectUndo(ParentToolsList.SelectedGameObject, undoGroupName);
+
+            // Set up Undo
+            if (ParentToolsList.SelectedGameObject)
+            {
+                Undo.SetCurrentGroupName(undoGroupName);
+                Undo.RegisterFullObjectHierarchyUndo(ParentToolsList.SelectedGameObject, undoGroupName);
+            }
+
+            Log.Log(LogLevel.Info, $"Running: {GetToolName()}...");
 
             // Run the tool
             RunTool(ParentToolsList.SelectedGameObject, ParentToolsList.EditorSettings, undoGroupName);
 
             // Collapse all undo operations into a single entry
             Undo.CollapseUndoOperations(undoGroup);
+
+            Log.Log(LogLevel.Info, $"Running: {GetToolName()}... DONE!");
         }
 
         /// <summary>
