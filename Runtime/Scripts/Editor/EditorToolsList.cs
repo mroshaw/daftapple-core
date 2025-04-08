@@ -4,18 +4,17 @@ using UnityEngine.UIElements;
 
 namespace DaftAppleGames.Editor
 {
-    [CreateAssetMenu(fileName = "EditorTools", menuName = "Daft Apple Games/Editor Tools/Editor Tools List")]
-    public class EditorTools : ScriptableObject
+    public abstract class EditorToolsList : ScriptableObject
     {
         // List of tools to be made available via the Wizard UI
         [SerializeField] private List<EditorTool> editorToolsList;
 
         // Properties available to child Tool instances
-        internal ButtonWizardEditorSettings EditorSettings { get; private set; }
+        public ButtonWizardEditorSettings EditorSettings { get; private set; }
 
-        internal GameObject SelectedGameObject { get; private set; }
+        public GameObject SelectedGameObject { get; private set; }
 
-        internal EditorLog EditorLog { get; private set; }
+        public EditorLog EditorLog { get; private set; }
 
         /// <summary>
         /// Constructs the UI by iterating over each tool and getting its UI

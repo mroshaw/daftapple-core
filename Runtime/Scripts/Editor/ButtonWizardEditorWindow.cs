@@ -7,7 +7,7 @@ namespace DaftAppleGames.Editor
 {
     public abstract class ButtonWizardEditorWindow : BaseEditorWindow
     {
-        [SerializeField] private EditorTools editorTools;
+        [SerializeField] private EditorToolsList editorToolsList;
         [SerializeField] private ButtonWizardEditorSettings editorSettings;
         [SerializeField] private GameObject selectedGameObject;
 
@@ -30,18 +30,18 @@ namespace DaftAppleGames.Editor
             saveSettingCopyButton.clicked += SaveCopyOfSettings;
 
             VisualElement toolsButtonsContainer = CustomEditorRootVisualElement.Q<VisualElement>("ToolButtonsContainer");
-            toolsButtonsContainer.Add(editorTools.GetUserInterface(Log));
+            toolsButtonsContainer.Add(editorToolsList.GetUserInterface(Log));
 
             selectedGameObject = null;
 
-            if (editorSettings && editorTools)
+            if (editorSettings && editorToolsList)
             {
-                editorTools.SetEditorSettings(editorSettings);
+                editorToolsList.SetEditorSettings(editorSettings);
             }
 
-            if (selectedGameObject && editorTools)
+            if (selectedGameObject && editorToolsList)
             {
-                editorTools.SetSelectedGameObject(selectedGameObject);
+                editorToolsList.SetSelectedGameObject(selectedGameObject);
             }
 
             BindUI();
@@ -55,7 +55,7 @@ namespace DaftAppleGames.Editor
         private void SaveCopyOfSettings()
         {
             editorSettings = editorSettings.SaveALocalCopy();
-            editorTools.SetEditorSettings(editorSettings);
+            editorToolsList.SetEditorSettings(editorSettings);
         }
 
         /// <summary>
@@ -66,13 +66,13 @@ namespace DaftAppleGames.Editor
         {
             if (changeEvent.newValue is ButtonWizardEditorSettings newEditorSettings)
             {
-                editorTools.SetEditorSettings(newEditorSettings);
+                editorToolsList.SetEditorSettings(newEditorSettings);
             }
         }
 
         private void SelectedGameObjectChangedCallback(ChangeEvent<Object> changeEvent)
         {
-            editorTools.SetSelectedGameObject(changeEvent.newValue as GameObject);
+            editorToolsList.SetSelectedGameObject(changeEvent.newValue as GameObject);
         }
     }
 }

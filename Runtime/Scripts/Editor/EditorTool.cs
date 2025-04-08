@@ -21,13 +21,13 @@ namespace DaftAppleGames.Editor
 
         protected EditorLog Log;
 
-        private VisualElement _rootVisualElement;
-        private GameObject _selectedGameObject;
-        private EditorTools _parentTools;
+        protected VisualElement RootVisualElement;
+        protected GameObject SelectedGameObject;
+        protected EditorToolsList ParentToolsList;
 
-        internal void SetParentEditorTools(EditorTools parentTools, EditorLog log)
+        internal void SetParentEditorTools(EditorToolsList parentToolsList, EditorLog log)
         {
-            _parentTools = parentTools;
+            ParentToolsList = parentToolsList;
             Log = log;
         }
 
@@ -36,22 +36,39 @@ namespace DaftAppleGames.Editor
         /// </summary>
         protected internal virtual VisualElement InitUserInterface()
         {
-            _rootVisualElement = visualTreeAsset.CloneTree();
+            RootVisualElement = visualTreeAsset.CloneTree();
 
-            // Bind the button click to RunTool
-            Button runToolButton = _rootVisualElement.Q<Button>(runToolButtonName);
+            // Find the button
+            Button runToolButton = RootVisualElement.Q<Button>(runToolButtonName);
             if (runToolButton == null)
             {
                 Debug.LogError($"Could not find button named {runToolButtonName}!!!");
                 return null;
             }
 
+            // Check to see if the tool is supported. If not, disable the button and add a tooltip
+            if (!IsSupported(out string notSupportedReason))
+            {
+                runToolButton.SetEnabled(false);
+                runToolButton.tooltip = notSupportedReason;
+                return RootVisualElement;
+            }
+
+            // Bind the button click to RunTool
             runToolButton.clicked -= RunToolClicked;
             runToolButton.clicked += RunToolClicked;
 
+            // Find the Options FoldoutGroup, if it exists, and close it by default
+            Foldout optionsFoldout = RootVisualElement.Q<Foldout>();
+            if (optionsFoldout != null)
+            {
+                optionsFoldout.value = false;
+            }
+
+            // Bind any other custom controls and properties
             AddCustomBindings();
 
-            return _rootVisualElement;
+            return RootVisualElement;
         }
 
         protected virtual void AddCustomBindings()
@@ -63,23 +80,12 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void RunToolClicked()
         {
-            if (!CanRunTool(_parentTools.SelectedGameObject, _parentTools.EditorSettings))
+            if (!CanRunTool(ParentToolsList.SelectedGameObject, ParentToolsList.EditorSettings))
             {
                 return;
             }
 
-            RunTool(_parentTools.SelectedGameObject, _parentTools.EditorSettings);
-        }
-
-        protected bool RequiredBuildingValidation()
-        {
-            if (_parentTools.SelectedGameObject && _parentTools.SelectedGameObject.HasComponent<Building>())
-            {
-                return true;
-            }
-
-            _parentTools.EditorLog.Log(LogLevel.Error, "The selected game object must contain a Building component to run this tool!");
-            return false;
+            RunTool(ParentToolsList.SelectedGameObject, ParentToolsList.EditorSettings);
         }
 
         /// <summary>
@@ -88,34 +94,20 @@ namespace DaftAppleGames.Editor
         /// <returns></returns>
         protected bool RequireSettingsAndGameObjectValidation()
         {
-            if (_parentTools.EditorSettings && _parentTools.SelectedGameObject)
+            if (ParentToolsList.EditorSettings && ParentToolsList.SelectedGameObject)
             {
                 return true;
             }
 
-            _parentTools.EditorLog.Log(LogLevel.Error, "You must select some settings and a game object to run this tool!");
+            ParentToolsList.EditorLog.Log(LogLevel.Error, "You must select some settings and a game object to run this tool!");
             return false;
         }
 
         /// <summary>
-        /// Binds the given toggle control to an event callback. This allows tools to present their own toggle options in the UI
-        /// and bind the control to a local bool
+        /// Returns true if the tool is supported in the current environment. For example, depending on the current Render Pipeline
         /// </summary>
-        /// <param name="toggleName"></param>
-        /// <param name="toggleChangeEvent"></param>
         /// <returns></returns>
-        protected bool BindToToggleOption(string toggleName, EventCallback<ChangeEvent<bool>> toggleChangeEvent)
-        {
-            Toggle toggle = _rootVisualElement.Q<Toggle>(toggleName);
-            if (toggle == null)
-            {
-                _parentTools.EditorLog.Log(LogLevel.Error, "Couldn't find toggle. Failed to bind option to toggle: " + toggleName);
-                return false;
-            }
-
-            toggle.RegisterValueChangedCallback(toggleChangeEvent);
-            return toggle.value;
-        }
+        protected abstract bool IsSupported(out string notSupportedReason);
 
         /// <summary>
         /// Return true if the tool can run with the given parameters, otherwise false
