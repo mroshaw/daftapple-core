@@ -8,14 +8,14 @@ using DaftAppleGames.Attributes;
 
 namespace DaftAppleGames.Editor
 {
-    public class ButtonWizardEditorSettings : ScriptableObject
+    public abstract class ButtonWizardEditorSettings : ScriptableObject
     {
         [Button("Save A Copy")]
         internal ButtonWizardEditorSettings SaveALocalCopy()
         {
             string pathToSave = EditorUtility.SaveFilePanel(
                 "Save a local copy of settings",
-                "",
+                Application.dataPath,
                 "myBuildingEditorSettings.asset",
                 "asset");
 
