@@ -12,7 +12,6 @@ namespace DaftAppleGames.Editor.Package
         [SerializeField] internal string itemName;
         [SerializeField] internal string destinationFolder;
         [SerializeField] internal bool overwriteExisting = true;
-        [SerializeField] private bool isInstalled;
         [SerializeField] private Object installedItemCopy;
         internal string Name => itemAsset.name;
         internal Object ItemAsset => installedItemCopy;
@@ -60,8 +59,6 @@ namespace DaftAppleGames.Editor.Package
                 }
 
                 installedItemCopy = AssetDatabase.LoadAssetAtPath(relativeDestinationFilePath, itemAsset.GetType());
-                isInstalled = true;
-
                 itemInstalledAction?.Invoke();
 
                 return true;
@@ -74,7 +71,6 @@ namespace DaftAppleGames.Editor.Package
             }
 
             installedItemCopy = AssetDatabase.LoadAssetAtPath(relativeDestinationFilePath, itemAsset.GetType());
-            isInstalled = true;
             return true;
         }
     }
