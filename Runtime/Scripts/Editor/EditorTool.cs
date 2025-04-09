@@ -1,6 +1,4 @@
 using System;
-using DaftAppleGames.BuildingTools;
-using DaftAppleGames.Extensions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,16 +17,15 @@ namespace DaftAppleGames.Editor
         // Use a local instance to avoid writing changes to the asset
         private ButtonWizardEditorSettings _localEditorSettingsInstance;
 
-        protected EditorLog Log;
+        protected static EditorLog log;
 
         protected VisualElement RootVisualElement;
-        protected GameObject SelectedGameObject;
         protected EditorToolsList ParentToolsList;
 
-        internal void SetParentEditorTools(EditorToolsList parentToolsList, EditorLog log)
+        internal void SetParentEditorTools(EditorToolsList parentToolsList, EditorLog editorLog)
         {
             ParentToolsList = parentToolsList;
-            Log = log;
+            log = editorLog;
         }
 
         /// <summary>
@@ -71,8 +68,28 @@ namespace DaftAppleGames.Editor
             return RootVisualElement;
         }
 
+        /// <summary>
+        /// Can be override to provide custom UI control bindings in the tool window
+        /// </summary>
         protected virtual void AddCustomBindings()
         {
+        }
+
+        /// <summary>
+        /// Binds the given toggle control to an event callback. This allows tools to present their own toggle options in the UI
+        /// and bind the control to a local bool
+        /// </summary>
+        protected bool BindToToggleOption(string toggleName, EventCallback<ChangeEvent<bool>> toggleChangeEvent)
+        {
+            Toggle toggle = RootVisualElement.Q<Toggle>(toggleName);
+            if (toggle == null)
+            {
+                ParentToolsList.EditorLog.Log(LogLevel.Error, "Couldn't find toggle. Failed to bind option to toggle: " + toggleName);
+                return false;
+            }
+
+            toggle.RegisterValueChangedCallback(toggleChangeEvent);
+            return toggle.value;
         }
 
         /// <summary>
@@ -95,7 +112,7 @@ namespace DaftAppleGames.Editor
                 Undo.RegisterFullObjectHierarchyUndo(ParentToolsList.SelectedGameObject, undoGroupName);
             }
 
-            Log.Log(LogLevel.Info, $"Running: {GetToolName()}...");
+            log.Log(LogLevel.Info, $"Running: {GetToolName()}...");
 
             // Run the tool
             RunTool(ParentToolsList.SelectedGameObject, ParentToolsList.EditorSettings, undoGroupName);
@@ -103,7 +120,7 @@ namespace DaftAppleGames.Editor
             // Collapse all undo operations into a single entry
             Undo.CollapseUndoOperations(undoGroup);
 
-            Log.Log(LogLevel.Info, $"Running: {GetToolName()}... DONE!");
+            log.Log(LogLevel.Info, $"Running: {GetToolName()}... DONE!");
         }
 
         /// <summary>
