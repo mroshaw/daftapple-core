@@ -81,6 +81,7 @@ namespace DaftAppleGames.Editor
             _assetObjectsListView = rootVisualElement.Q<ListView>("AssetsObjectsListView");
             ConfigureListView(_assetObjectsListView);
 
+            // Bind UI controls
             BindUI();
         }
 
