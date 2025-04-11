@@ -1,4 +1,5 @@
 using System;
+using PlasticGui.WorkspaceWindow;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -55,10 +56,13 @@ namespace DaftAppleGames.Editor
             runToolButton.clicked -= RunToolClicked;
             runToolButton.clicked += RunToolClicked;
 
+            runToolButton.text = GetToolName();
+
             // Find the Options FoldoutGroup, if it exists, and close it by default
             Foldout optionsFoldout = RootVisualElement.Q<Foldout>();
             if (optionsFoldout != null)
             {
+                optionsFoldout.text = $"{GetToolName()} Options";
                 optionsFoldout.value = false;
             }
 
