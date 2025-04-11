@@ -89,9 +89,15 @@ namespace DaftAppleGames.Editor
             introText = IntroText;
 
             Log.Log(LogLevel.Info, WelcomeLogText);
+
+            CreateCustomGUI();
+
+            BindUI();
         }
 
-        protected void BindUI()
+        protected abstract void CreateCustomGUI();
+
+        private void BindUI()
         {
             // Bind to UI
             _serializedObject = new SerializedObject(this);

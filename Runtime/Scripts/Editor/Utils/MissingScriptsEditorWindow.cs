@@ -39,13 +39,8 @@ namespace DaftAppleGames.Editor
 
         #region UI creation
 
-        /// <summary>
-        ///     Override the base CreateGUI to add in the specific editor content
-        /// </summary>
-        public override void CreateGUI()
+        protected override void CreateCustomGUI()
         {
-            base.CreateGUI();
-
             // Register buttons
             _findMissingScriptsInSceneButton = rootVisualElement.Q<Button>("FindMissingScriptsInSceneButton");
             if (_findMissingScriptsInSceneButton != null)
@@ -80,9 +75,6 @@ namespace DaftAppleGames.Editor
             ConfigureListView(_objectsInSceneListView);
             _assetObjectsListView = rootVisualElement.Q<ListView>("AssetsObjectsListView");
             ConfigureListView(_assetObjectsListView);
-
-            // Bind UI controls
-            BindUI();
         }
 
         private static void ConfigureListView(ListView listView)

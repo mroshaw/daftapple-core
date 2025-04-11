@@ -43,8 +43,6 @@ namespace DaftAppleGames.Editor
             {
                 editorToolsList.SetSelectedGameObject(selectedGameObject);
             }
-
-            BindUI();
         }
 
         private void OnSelectionChange()
