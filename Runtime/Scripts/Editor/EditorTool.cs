@@ -1,5 +1,5 @@
 using System;
-using PlasticGui.WorkspaceWindow;
+using PlasticGui.Configuration.CloudEdition.Welcome;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,6 +12,11 @@ namespace DaftAppleGames.Editor
     /// </summary>
     [Serializable] public abstract class EditorTool : ScriptableObject
     {
+        // Standard return strings for validation functions
+        protected static string selectEditorSettingsError = "Please select some editor settings!";
+        protected static string selectEditorSettingsAndGameObjectError = "Please select some editor settings and a game object!";
+        protected static string selectGameObjectError = "Please a game object!";
+
         [SerializeField] private VisualTreeAsset visualTreeAsset;
         [SerializeField] private string runToolButtonName;
 
@@ -27,6 +32,14 @@ namespace DaftAppleGames.Editor
         {
             ParentToolsList = parentToolsList;
             log = editorLog;
+        }
+
+        /// <summary>
+        /// Shows a popup dialog, locking the base window until the popup is closed
+        /// </summary>
+        protected void ShowPopupWindow(string windowTitleText, string popUpTitleText, string popUpContentText)
+        {
+            ParentToolsList.BaseEditorWindow.ShowPopupWindow(windowTitleText, popUpTitleText, popUpContentText);
         }
 
         /// <summary>
@@ -101,8 +114,9 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void RunToolClicked()
         {
-            if (!CanRunTool(ParentToolsList.SelectedGameObject, ParentToolsList.EditorSettings))
+            if (!CanRunTool(ParentToolsList.SelectedGameObject, ParentToolsList.EditorSettings, out string cannotRunReason))
             {
+                log.Log(LogLevel.Error, cannotRunReason);
                 return;
             }
 
@@ -138,7 +152,6 @@ namespace DaftAppleGames.Editor
                 return true;
             }
 
-            ParentToolsList.EditorLog.Log(LogLevel.Error, "You must select some settings and a game object to run this tool!");
             return false;
         }
 
@@ -156,7 +169,7 @@ namespace DaftAppleGames.Editor
         /// <summary>
         /// Return true if the tool can run with the given parameters, otherwise false
         /// </summary>
-        protected abstract bool CanRunTool(GameObject selectedGameObject, ButtonWizardEditorSettings editorSettings);
+        protected abstract bool CanRunTool(GameObject selectedGameObject, ButtonWizardEditorSettings editorSettings, out string cannotRunReason);
 
         /// <summary>
         /// Runs the tool, on the basis that inputs are valid

@@ -34,6 +34,11 @@ namespace DaftAppleGames.Editor
 
             selectedGameObject = Selection.activeGameObject;
 
+            if (editorToolsList)
+            {
+                editorToolsList.SetBaseEditorWindow(this);
+            }
+
             if (editorSettings && editorToolsList)
             {
                 editorToolsList.SetEditorSettings(editorSettings);

@@ -16,6 +16,9 @@ namespace DaftAppleGames.Editor
 
         public EditorLog EditorLog { get; private set; }
 
+        // Allows the tools to access UI methods of the main window
+        internal BaseEditorWindow BaseEditorWindow { get; private set; }
+
         /// <summary>
         /// Constructs the UI by iterating over each tool and getting its UI
         /// </summary>
@@ -44,6 +47,11 @@ namespace DaftAppleGames.Editor
         public void SetEditorSettings(ButtonWizardEditorSettings editorSettings)
         {
             EditorSettings = editorSettings;
+        }
+
+        public void SetBaseEditorWindow(BaseEditorWindow baseEditorWindow)
+        {
+            BaseEditorWindow = baseEditorWindow;
         }
 
         /// <summary>

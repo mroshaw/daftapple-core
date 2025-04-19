@@ -116,6 +116,34 @@ namespace DaftAppleGames.Editor
         }
 
         /// <summary>
+        /// Returns True if all given layers exist
+        /// </summary>
+        public static bool DoLayersExist(string[] layerNames)
+        {
+            foreach (string layerName in layerNames)
+            {
+                bool found = false;
+
+                for (int j = 0; j < 32; j++)
+                {
+                    string existingLayer = LayerMask.LayerToName(j);
+                    if (existingLayer == layerName)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Adds a Layer to the project layer list
         /// </summary>
         public static void AddLayer(string layerName)

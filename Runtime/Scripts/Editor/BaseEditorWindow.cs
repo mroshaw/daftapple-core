@@ -1,3 +1,5 @@
+using System;
+using DaftAppleGames.Editor.Extensions;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -16,6 +18,8 @@ namespace DaftAppleGames.Editor
         [SerializeField] private string logText;
         [SerializeField] private string titleText;
         [SerializeField] private string introText;
+
+        private bool _isPopupOpen = false;
 
         // Logging instance
         protected EditorLog Log;
@@ -132,6 +136,37 @@ namespace DaftAppleGames.Editor
                 _logTextScrollView.scrollOffset = _logTextScrollView.contentContainer.layout.max - _logTextScrollView.contentViewport.layout.size;
                 // _logTextScrollView.scrollOffset = new Vector2(0, float.MaxValue); // Force scroll to bottom
             }
+        }
+
+        /// <summary>
+        /// Shows a Popup dialog that blocks interaction with the window until closed.
+        /// </summary>
+        protected internal void ShowPopupWindow(string windowTitleText, string popUpTitleText, string popUpContentText)
+        {
+            // Check if popup is already being shown
+            if (_isPopupOpen)
+            {
+                return;
+            }
+
+            // Disable window content
+            SetContentInteractableState(false);
+            PopupWindow.Show(windowTitleText, popUpTitleText, popUpContentText, PopupClosed);
+        }
+
+        private void PopupClosed()
+        {
+            _isPopupOpen = false;
+            // Enable window content
+            SetContentInteractableState(true);
+        }
+
+        /// <summary>
+        /// Sets the content of the Editor Window to be interactable or not
+        /// </summary>
+        private void SetContentInteractableState(bool stateValue)
+        {
+            rootVisualElement.SetInteractableState(stateValue);
         }
     }
 }
