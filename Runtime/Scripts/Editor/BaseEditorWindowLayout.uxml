@@ -10,7 +10,7 @@
             <engine:VisualElement name="LoggingControlsContainer">
                 <engine:VisualElement name="LogCheckBoxContainer" class="HorizontalAlignContainer">
                     <engine:Toggle label="Detailed logs:" name="DetailedLoggingToggle" class="Label" />
-                    <engine:Toggle label="Log to Console:" name="LogToConsoleToggle" class="Label" />
+                    <engine:Toggle label="Log to Console:" name="LogToConsoleToggle" value="true" class="Label" />
                 </engine:VisualElement>
                 <engine:Button text="Clear Log" name="ClearLogButton" class="Button" />
             </engine:VisualElement>

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using DaftAppleGames.Editor.Extensions;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -24,6 +26,8 @@ namespace DaftAppleGames.Editor
         // Logging instance
         protected EditorLog Log;
         protected VisualElement CustomEditorRootVisualElement;
+
+        protected internal StyleSheet EditorWindowMainStyleSheet => baseVisualTree.stylesheets.FirstOrDefault();
 
         private Button _clearLogButton;
         private VisualElement _customEditorContainer;
@@ -92,7 +96,7 @@ namespace DaftAppleGames.Editor
             titleText = ToolTitle;
             introText = IntroText;
 
-            Log.Log(LogLevel.Info, WelcomeLogText);
+            Log.AddToLog(LogLevel.Info, WelcomeLogText);
 
             CreateCustomGUI();
 

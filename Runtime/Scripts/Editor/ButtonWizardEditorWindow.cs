@@ -1,15 +1,19 @@
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UIElements;
 
 namespace DaftAppleGames.Editor
 {
     public abstract class ButtonWizardEditorWindow : BaseEditorWindow
     {
-        [SerializeField] private EditorToolsList editorToolsList;
         [SerializeField] private ButtonWizardEditorSettings editorSettings;
         [SerializeField] private GameObject selectedGameObject;
+
+        protected internal UnityEvent<GameObject> SelectedGameObjectChanged = new();
+
+        private VisualElement _toolButtonsContainer;
 
         /// <summary>
         /// Create and binds the UI
@@ -22,60 +26,46 @@ namespace DaftAppleGames.Editor
             ObjectField settingsObjectField = CustomEditorRootVisualElement.Q<ObjectField>("SettingsField");
             settingsObjectField.RegisterValueChangedCallback(SettingsChangedCallback);
 
-            ObjectField selectedGameObjectField = CustomEditorRootVisualElement.Q<ObjectField>("SelectedObjectField");
-            selectedGameObjectField.RegisterValueChangedCallback(SelectedGameObjectChangedCallback);
-
             Button saveSettingCopyButton = CustomEditorRootVisualElement.Q<Button>("SaveLocalSettingsCopyButton");
             saveSettingCopyButton.clicked -= SaveCopyOfSettings;
             saveSettingCopyButton.clicked += SaveCopyOfSettings;
 
-            VisualElement toolsButtonsContainer = CustomEditorRootVisualElement.Q<VisualElement>("ToolButtonsContainer");
-            toolsButtonsContainer.Add(editorToolsList.GetUserInterface(Log));
-
+            _toolButtonsContainer = CustomEditorRootVisualElement.Q<VisualElement>("ToolButtonsContainer");
             selectedGameObject = Selection.activeGameObject;
 
-            if (editorToolsList)
+            InitTools();
+            OnSelectionChange();
+        }
+
+        private void InitTools()
+        {
+            if (!editorSettings)
             {
-                editorToolsList.SetBaseEditorWindow(this);
+                return;
             }
 
-            if (editorSettings && editorToolsList)
-            {
-                editorToolsList.SetEditorSettings(editorSettings);
-            }
-
-            if (selectedGameObject && editorToolsList)
-            {
-                editorToolsList.SetSelectedGameObject(selectedGameObject);
-            }
+            _toolButtonsContainer.Clear();
+            _toolButtonsContainer.Add(editorSettings.InitSettings(this, Log));
         }
 
         private void OnSelectionChange()
         {
             selectedGameObject = Selection.activeGameObject;
+            SelectedGameObjectChanged?.Invoke(selectedGameObject);
         }
 
         private void SaveCopyOfSettings()
         {
             editorSettings = editorSettings.SaveALocalCopy();
-            editorToolsList.SetEditorSettings(editorSettings);
         }
 
         /// <summary>
-        /// If the user picks new settings, let the Tools List know so that it can propagate the change
+        /// If the user picks new settings, refresh the tools
         /// to each tool
         /// </summary>
         private void SettingsChangedCallback(ChangeEvent<Object> changeEvent)
         {
-            if (changeEvent.newValue is ButtonWizardEditorSettings newEditorSettings)
-            {
-                editorToolsList.SetEditorSettings(newEditorSettings);
-            }
-        }
-
-        private void SelectedGameObjectChangedCallback(ChangeEvent<Object> changeEvent)
-        {
-            editorToolsList.SetSelectedGameObject(changeEvent.newValue as GameObject);
+            InitTools();
         }
     }
 }

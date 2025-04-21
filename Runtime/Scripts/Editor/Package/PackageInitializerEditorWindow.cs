@@ -92,13 +92,13 @@ namespace DaftAppleGames.Editor
         {
             if (!force && _localPackageCopy.IsAlreadyInstalled())
             {
-                Log.Log(LogLevel.Error, "Already installed!");
+                Log.AddToLog(LogLevel.Error, "Already installed!");
                 return;
             }
 
-            Log.Log(LogLevel.Info, "Installing... ", true);
+            Log.AddToLog(LogLevel.Info, "Installing... ", true);
             bool installResult = _localPackageCopy.Install(Log);
-            Log.Log(LogLevel.Info, installResult ? "Install complete!" : "Install failed! Check logs!", true);
+            Log.AddToLog(LogLevel.Info, installResult ? "Install complete!" : "Install failed! Check logs!", true);
             CustomEditorTools.SaveChangesToAsset(_localPackageCopy);
         }
 
@@ -106,24 +106,24 @@ namespace DaftAppleGames.Editor
         {
             if (!_localPackageCopy.IsAlreadyInstalled())
             {
-                Log.Log(LogLevel.Error, "Package is not installed!!");
+                Log.AddToLog(LogLevel.Error, "Package is not installed!!");
             }
 
-            Log.Log(LogLevel.Info, "Uninstalling...", true);
+            Log.AddToLog(LogLevel.Info, "Uninstalling...", true);
             bool installResult = _localPackageCopy.UnInstall(Log);
-            Log.Log(LogLevel.Info, installResult ? "Uninstall complete!" : "Install failed! Check logs!", true);
+            Log.AddToLog(LogLevel.Info, installResult ? "Uninstall complete!" : "Install failed! Check logs!", true);
         }
 
         private void ReInstall()
         {
             if (!_localPackageCopy.IsAlreadyInstalled())
             {
-                Log.Log(LogLevel.Error, "Package is not installed!!");
+                Log.AddToLog(LogLevel.Error, "Package is not installed!!");
             }
 
-            Log.Log(LogLevel.Info, "Reinstalling...", true);
+            Log.AddToLog(LogLevel.Info, "Reinstalling...", true);
             Install(true);
-            Log.Log(LogLevel.Info, "Reinstall Complete!", true);
+            Log.AddToLog(LogLevel.Info, "Reinstall Complete!", true);
         }
 
         private void SetButtonState(bool installedState)

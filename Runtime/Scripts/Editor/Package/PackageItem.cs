@@ -20,14 +20,14 @@ namespace DaftAppleGames.Editor.Package
         {
             if (!itemAsset)
             {
-                log.Log(LogLevel.Error, "Item asset is missing. Aborting.");
+                log.AddToLog(LogLevel.Error, "Item asset is missing. Aborting.");
                 return false;
             }
 
             string absoluteDestinationFolderPath = Path.Combine(absoluteInstallPath, destinationFolder);
             if (!Directory.Exists(absoluteDestinationFolderPath))
             {
-                log.Log(LogLevel.Info, $"Creating folder {absoluteDestinationFolderPath}...");
+                log.AddToLog(LogLevel.Info, $"Creating folder {absoluteDestinationFolderPath}...");
                 AssetDatabase.CreateFolder(relativeInstallPath, destinationFolder);
             }
 
@@ -42,7 +42,7 @@ namespace DaftAppleGames.Editor.Package
             bool ignoreFile = fileAlreadyExists && !overwriteExisting;
             if (ignoreFile)
             {
-                log.Log(LogLevel.Info, $"File already exists and overwrite is false. Skipping item: {itemAsset.name}");
+                log.AddToLog(LogLevel.Info, $"File already exists and overwrite is false. Skipping item: {itemAsset.name}");
             }
 
             string relativeDestinationFilePath = Path.Combine(relativeInstallPath, destinationFolder, assetFileName);
@@ -54,7 +54,7 @@ namespace DaftAppleGames.Editor.Package
                 {
                     GameObject prefabInstance = PrefabUtility.InstantiatePrefab(itemAsset) as GameObject;
                     PrefabUtility.SaveAsPrefabAsset(prefabInstance, relativeDestinationFilePath);
-                    log.Log(LogLevel.Info, "Prefab instance created at: " + originalAssetFullPath);
+                    log.AddToLog(LogLevel.Info, "Prefab instance created at: " + originalAssetFullPath);
                     Object.DestroyImmediate(prefabInstance);
                 }
 

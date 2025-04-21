@@ -90,7 +90,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindInScene()
         {
-            Log.Log(LogLevel.Info, "Searching for missing scripts in open scenes...");
+            Log.AddToLog(LogLevel.Info, "Searching for missing scripts in open scenes...");
             FindMissingScriptsInOpenScenes(false);
         }
 
@@ -99,7 +99,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindAndDeleteInScene()
         {
-            Log.Log(LogLevel.Info, "Searching for and deleting missing scripts in open scenes...");
+            Log.AddToLog(LogLevel.Info, "Searching for and deleting missing scripts in open scenes...");
             FindMissingScriptsInOpenScenes(true);
         }
 
@@ -108,7 +108,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindInAssets()
         {
-            Log.Log(LogLevel.Info, "Searching for missing scripts in assets...");
+            Log.AddToLog(LogLevel.Info, "Searching for missing scripts in assets...");
             FindMissingScriptsInAssets(false);
         }
 
@@ -117,7 +117,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindAndDeleteInAssets()
         {
-            Log.Log(LogLevel.Info, "Searching for and deleting missing scripts in assets...");
+            Log.AddToLog(LogLevel.Info, "Searching for and deleting missing scripts in assets...");
             FindMissingScriptsInAssets(true);
         }
 
@@ -136,7 +136,7 @@ namespace DaftAppleGames.Editor
                 }
             }
 
-            Log.Log(LogLevel.Info, $"Found {objectsWithMissingScriptsInScenes.Count} missing script(s) in open scenes.");
+            Log.AddToLog(LogLevel.Info, $"Found {objectsWithMissingScriptsInScenes.Count} missing script(s) in open scenes.");
 
             if (deleteScripts)
             {
@@ -155,7 +155,7 @@ namespace DaftAppleGames.Editor
             bool hasMissingScript = components.Any(c => c == null);
             if (hasMissingScript)
             {
-                Log.Log(LogLevel.Info, $"Found missing script on: {parentGameObject.name}");
+                Log.AddToLog(LogLevel.Info, $"Found missing script on: {parentGameObject.name}");
                 objectsWithMissingScriptsInScenes.Add(parentGameObject);
             }
 
@@ -199,12 +199,12 @@ namespace DaftAppleGames.Editor
                     continue;
                 }
 
-                Log.Log(LogLevel.Info, $"Found missing script on: {assetRoot.name}");
+                Log.AddToLog(LogLevel.Info, $"Found missing script on: {assetRoot.name}");
                 missingAssetNames.Add(assetPath);
                 objectsWithMissingScriptsInAssets.Add(assetRoot);
             }
 
-            Log.Log(LogLevel.Info, $"Found {objectsWithMissingScriptsInAssets.Count} missing script(s) in assets.");
+            Log.AddToLog(LogLevel.Info, $"Found {objectsWithMissingScriptsInAssets.Count} missing script(s) in assets.");
 
             if (deleteScripts)
             {
@@ -216,21 +216,21 @@ namespace DaftAppleGames.Editor
 
         private void DeleteMissingScripts(List<GameObject> gameObjectsWithMissingScripts)
         {
-            Log.Log(LogLevel.Info, "Deleting missing scripts...");
+            Log.AddToLog(LogLevel.Info, "Deleting missing scripts...");
             foreach (GameObject go in gameObjectsWithMissingScripts)
             {
                 GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
-                Log.Log($"Deleted missing script from: {go.name}");
+                Log.AddToLog($"Deleted missing script from: {go.name}");
                 if (!go.hideFlags.HasFlag(HideFlags.HideInHierarchy))
                 {
                     continue;
                 }
 
-                Log.Log($"Revealing hidden GameObject: {go.name}");
+                Log.AddToLog($"Revealing hidden GameObject: {go.name}");
                 go.hideFlags &= ~HideFlags.HideInHierarchy;
             }
 
-            Log.Log(LogLevel.Info, "Deleting missing scripts... Done.");
+            Log.AddToLog(LogLevel.Info, "Deleting missing scripts... Done.");
         }
     }
 }

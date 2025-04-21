@@ -32,12 +32,20 @@ namespace DaftAppleGames.Editor
             _logEntries = new List<string>();
         }
 
-        public void Log(string logEntry)
+        public void AddToLog(string logEntry)
         {
-            Log(LogLevel.Info, logEntry);
+            AddToLog(LogLevel.Info, logEntry);
         }
 
-        public void Log(LogLevel logLevel, string logEntry, bool forceLog = false)
+        public void AddToLog(LogLevel logLevel, List<string> logEntries, bool forceLog = false)
+        {
+            foreach (string entry in logEntries)
+            {
+                AddToLog(logLevel, entry, forceLog);
+            }
+        }
+
+        public void AddToLog(LogLevel logLevel, string logEntry, bool forceLog = false)
         {
             string fullLogText;
 

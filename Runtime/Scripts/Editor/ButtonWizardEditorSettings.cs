@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
 #else
@@ -10,13 +12,37 @@ namespace DaftAppleGames.Editor
 {
     public abstract class ButtonWizardEditorSettings : ScriptableObject
     {
+        [SerializeField] [BoxGroup("Tools")] internal List<EditorTool> toolsList;
+
+        /// <summary>
+        /// Constructs the Tools by iterating over each tool and getting its UI
+        /// </summary>
+        protected internal VisualElement InitSettings(ButtonWizardEditorWindow baseButtonWizardEditorWindow, EditorLog log)
+        {
+            VisualElement rootElement = new();
+
+            foreach (EditorTool editorTool in toolsList)
+            {
+                // Uncomment this if you want an outline container
+                /*
+                VisualElement toolContainer = new();
+                toolContainer.AddToClassList("OutlineContainer");
+                toolContainer.Add(editorTool.InitTool(baseButtonWizardEditorWindow, log));
+                rootElement.Add(toolContainer);
+                */
+                rootElement.Add(editorTool.InitTool(baseButtonWizardEditorWindow, log));
+            }
+
+            return rootElement;
+        }
+
         [Button("Save A Copy")]
         internal ButtonWizardEditorSettings SaveALocalCopy()
         {
             string pathToSave = EditorUtility.SaveFilePanel(
                 "Save a local copy of settings",
                 Application.dataPath,
-                "myBuildingEditorSettings.asset",
+                "ButtonWizardEditorSettings.asset",
                 "asset");
 
             if (string.IsNullOrEmpty(pathToSave))

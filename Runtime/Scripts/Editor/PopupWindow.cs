@@ -27,7 +27,21 @@ namespace DaftAppleGames.Editor
             PopupWindow popupWindow = CreateInstance<PopupWindow>();
             popupWindow.titleContent = new GUIContent(windowTitleText);
             popupWindow.Init(titleText, contentText, okButtonCallBack);
-            popupWindow.ShowUtility(); // Makes it modal
+
+            // Set the window's position
+            popupWindow.ShowUtility();
+            popupWindow.CenterOnMainWindow();
+        }
+
+        private void CenterOnMainWindow()
+        {
+            Rect main = EditorGUIUtility.GetMainWindowPosition();
+            Rect popup = position;
+            popup.width = 500;
+            popup.height = 200;
+            popup.x = main.x + (main.width - popup.width) * 0.5f;
+            popup.y = main.y + (main.height - popup.height) * 0.5f;
+            position = popup;
         }
 
         public static void ShowWindow()
