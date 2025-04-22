@@ -23,13 +23,6 @@ namespace DaftAppleGames.Editor
 
             foreach (EditorTool editorTool in toolsList)
             {
-                // Uncomment this if you want an outline container
-                /*
-                VisualElement toolContainer = new();
-                toolContainer.AddToClassList("OutlineContainer");
-                toolContainer.Add(editorTool.InitTool(baseButtonWizardEditorWindow, log));
-                rootElement.Add(toolContainer);
-                */
                 rootElement.Add(editorTool.InitTool(baseButtonWizardEditorWindow, log));
             }
 

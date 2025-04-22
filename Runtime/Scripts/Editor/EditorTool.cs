@@ -42,15 +42,27 @@ namespace DaftAppleGames.Editor
             ParentEditorWindow = editorWindow;
 
             VisualElement toolContainer = new();
+            toolContainer.AddToClassList("RowContainer");
 
-            // Create the button
+            // Create the run tool button
             Button runToolButton = new()
             {
                 text = GetToolName()
             };
             runToolButton.AddToClassList("Button");
 
+            // Create the tool settings button
+            // Built-in gear icon (from UnityEditor built-in textures)
+            Texture gearIcon = EditorGUIUtility.IconContent("_Popup").image;
+            Image gearImage = new() { image = gearIcon };
+
+            Button toolSettingsButton = new();
+            toolSettingsButton.AddToClassList("FixedButton");
+            toolSettingsButton.Add(gearImage);
+
+            // Add to the row container
             toolContainer.Add(runToolButton);
+            toolContainer.Add(toolSettingsButton);
 
             // Check to see if the tool is supported. If not, disable the button and add a tooltip
             if (!IsSupported(out string notSupportedReason))
@@ -63,6 +75,10 @@ namespace DaftAppleGames.Editor
             // Bind the button click to RunTool
             runToolButton.clicked -= RunToolClicked;
             runToolButton.clicked += RunToolClicked;
+
+            // Bind the settings button clicks
+            toolSettingsButton.clicked -= SettingsClicked;
+            toolSettingsButton.clicked += SettingsClicked;
 
             // Bind any other custom controls and properties
             AddCustomBindings();
@@ -116,6 +132,12 @@ namespace DaftAppleGames.Editor
             Undo.CollapseUndoOperations(undoGroup);
 
             log.AddToLog(LogLevel.Info, $"Running: {GetToolName()}... DONE!");
+        }
+
+        private void SettingsClicked()
+        {
+            Selection.activeObject = this;
+            EditorGUIUtility.PingObject(this);
         }
 
         /// <summary>
