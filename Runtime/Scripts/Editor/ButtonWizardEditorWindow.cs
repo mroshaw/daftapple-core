@@ -54,6 +54,14 @@ namespace DaftAppleGames.Editor
             SelectedGameObjectChanged?.Invoke(selectedGameObject);
         }
 
+        /// <summary>
+        /// If the user docks/hides the window, when they return, we want to refresh the selected object
+        /// </summary>
+        private void OnFocus()
+        {
+            OnSelectionChange();
+        }
+
         private void SaveCopyOfSettings()
         {
             editorSettings = editorSettings.SaveALocalCopy();
