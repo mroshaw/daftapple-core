@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using DaftAppleGames.Editor.Extensions;
 using UnityEditor;
@@ -76,10 +74,7 @@ namespace DaftAppleGames.Editor
 
                 Toggle logToConsoleToggle = rootVisualElement.Q<Toggle>("LogToConsoleToggle");
                 logToConsoleToggle?.RegisterValueChangedCallback(evt => LogToConsoleToggled(evt.newValue));
-                if (logToConsoleToggle != null)
-                {
-                    logToConsole = logToConsoleToggle.value;
-                }
+                logToConsole = logToConsoleToggle == null || logToConsoleToggle.value;
 
                 Button clearLogButton = rootVisualElement.Q<Button>("ClearLogButton");
                 clearLogButton.clicked -= ClearLog;
