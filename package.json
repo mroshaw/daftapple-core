@@ -1,7 +1,7 @@
 {
   "name": "com.daftapplegames.daftapple-core",
   "version": "0.9.0",
-  "displayName": "Daft Apple Games Core",
+  "displayName": "Daft Apple Core",
   "description": "A number of scripts and assets shared across all Daft Apple custom Unity packages",
   "unity": "6000.0",
   "documentationUrl": "https://mroshaw.github.io/unity-framework-docs/",
