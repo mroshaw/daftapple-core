@@ -1,12 +1,12 @@
 {
   "name": "com.daftapplegames.daftapple-core",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "displayName": "Daft Apple Games Core",
-  "description": "A number of scripts and asssets shared across all Daft Apple custom Unity packages",
+  "description": "A number of scripts and assets shared across all Daft Apple custom Unity packages",
   "unity": "6000.0",
-  "documentationUrl": "https://example.com/",
-  "changelogUrl": "https://example.com/changelog.html",
-  "licensesUrl": "https://example.com/licensing.html",
+  "documentationUrl": "https://mroshaw.github.io/unity-framework-docs/",
+  "changelogUrl": "https://mroshaw.github.io/unity-framework-docs/changelog.html",
+  "licensesUrl": "https://raw.githubusercontent.com/mroshaw/daftapple-core/refs/heads/main/LICENSE",
   "keywords": [
     "Daft Apple Games"
   ],
