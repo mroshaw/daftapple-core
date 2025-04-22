@@ -49,7 +49,7 @@ namespace DaftAppleGames.Editor
             {
                 text = GetToolName()
             };
-            runToolButton.AddToClassList("Button");
+            runToolButton.AddToClassList("StretchButton");
 
             // Create the tool settings button
             // Built-in gear icon (from UnityEditor built-in textures)
