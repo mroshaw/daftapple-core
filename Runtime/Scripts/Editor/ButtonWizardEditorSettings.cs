@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 #if ODIN_INSPECTOR
@@ -10,7 +9,7 @@ using DaftAppleGames.Attributes;
 
 namespace DaftAppleGames.Editor
 {
-    public abstract class ButtonWizardEditorSettings : ScriptableObject
+    public abstract class ButtonWizardEditorSettings : EnhancedScriptableObject
     {
         [SerializeField] [BoxGroup("Tools")] internal List<EditorTool> toolsList;
 
@@ -29,25 +28,31 @@ namespace DaftAppleGames.Editor
             return rootElement;
         }
 
-        [Button("Save A Copy")]
-        internal ButtonWizardEditorSettings SaveALocalCopy()
+        public override string SaveCopyInteractive(out EnhancedScriptableObject newInstance)
         {
-            string pathToSave = EditorUtility.SaveFilePanel(
-                "Save a local copy of settings",
-                Application.dataPath,
-                "ButtonWizardEditorSettings.asset",
-                "asset");
+            string pathToSave = base.SaveCopyInteractive(out EnhancedScriptableObject instanceCopy);
 
-            if (string.IsNullOrEmpty(pathToSave))
+            ButtonWizardEditorSettings newSettings = instanceCopy as ButtonWizardEditorSettings;
+
+            if (string.IsNullOrEmpty(pathToSave) || !newSettings)
             {
-                return this;
+                newInstance = this;
+                return string.Empty;
             }
 
-            string relativePath = "Assets" + pathToSave[Application.dataPath.Length..];
+            List<EditorTool> newToolsList = new();
 
-            ButtonWizardEditorSettings newEditorSettings = Instantiate(this);
-            AssetDatabase.CreateAsset(newEditorSettings, relativePath);
-            return newEditorSettings;
+            // Save a copy of each Tool config in the same folder
+            foreach (EditorTool editorTool in toolsList)
+            {
+                EditorTool newTool = editorTool.SaveCopy(pathToSave, string.Empty) as EditorTool;
+                newToolsList.Add(newTool);
+            }
+
+            newSettings.toolsList = newToolsList;
+
+            newInstance = newSettings;
+            return pathToSave;
         }
     }
 }

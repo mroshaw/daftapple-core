@@ -64,7 +64,10 @@ namespace DaftAppleGames.Editor
 
         private void SaveCopyOfSettings()
         {
-            editorSettings = editorSettings.SaveALocalCopy();
+            ;
+            _ = editorSettings.SaveCopyInteractive(out EnhancedScriptableObject newSettingsSoInstance);
+            ButtonWizardEditorSettings newSettings = newSettingsSoInstance as ButtonWizardEditorSettings;
+            editorSettings = newSettings;
         }
 
         /// <summary>

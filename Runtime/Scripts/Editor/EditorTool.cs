@@ -15,7 +15,7 @@ namespace DaftAppleGames.Editor
     /// Abstract class for creating new Editor tools that can be added to the
     /// main editor window
     /// </summary>
-    [Serializable] public abstract class EditorTool : ScriptableObject
+    [Serializable] public abstract class EditorTool : EnhancedScriptableObject
     {
         // Use a local instance to avoid writing changes to the asset
         private ButtonWizardEditorSettings _localEditorSettingsInstance;
