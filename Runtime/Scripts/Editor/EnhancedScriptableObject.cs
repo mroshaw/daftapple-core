@@ -36,7 +36,7 @@ namespace DaftAppleGames.Editor
             string saveFileName = Path.GetFileName(saveFullFilePath);
             string saveFolderPath = Path.GetDirectoryName(saveFullFilePath);
 
-            newInstance = SaveCopy(saveFolderPath, saveFileName);
+            newInstance = SaveCopy(saveFolderPath, saveFileName, string.Empty);
             return saveFolderPath;
         }
 
@@ -62,11 +62,22 @@ namespace DaftAppleGames.Editor
         /// <summary>
         /// Can be called externally to force a save without prompting for a path
         /// </summary>
-        public EnhancedScriptableObject SaveCopy(string pathToSave, string fileName)
+        public virtual EnhancedScriptableObject SaveCopy(string pathToSave, string fileName, string childFolder)
         {
-            string fileNameToSave = string.IsNullOrEmpty(fileName) ? GetAssetFileName() : fileName;
+            // Create the child folder, if it doesn't already exist
+            if (!string.IsNullOrEmpty(childFolder))
+            {
+                string childFolderPath = Path.Combine(pathToSave, childFolder);
+                if (!Directory.Exists(childFolderPath))
+                {
+                    Debug.Log($"Creating child folder at: {childFolderPath}");
+                    Directory.CreateDirectory(childFolderPath);
+                }
+            }
 
-            string fullFilePath = Path.Combine(pathToSave, fileNameToSave);
+            string fileNameToSave = string.IsNullOrEmpty(fileName) ? GetAssetFileName() : fileName;
+            string folderPath = string.IsNullOrEmpty(childFolder) ? pathToSave : Path.Combine(pathToSave, childFolder);
+            string fullFilePath = Path.Combine(folderPath, fileNameToSave);
 
             Debug.Log($"Saving copy of Scriptable Object {fileNameToSave} to: {fullFilePath}...");
             string relativePath = "Assets" + fullFilePath[Application.dataPath.Length..];

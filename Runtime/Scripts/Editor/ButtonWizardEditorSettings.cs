@@ -45,7 +45,7 @@ namespace DaftAppleGames.Editor
             // Save a copy of each Tool config in the same folder
             foreach (EditorTool editorTool in toolsList)
             {
-                EditorTool newTool = editorTool.SaveCopy(pathToSave, string.Empty) as EditorTool;
+                EditorTool newTool = editorTool.SaveCopy(pathToSave, string.Empty, "Tool Settings") as EditorTool;
                 newToolsList.Add(newTool);
             }
 
