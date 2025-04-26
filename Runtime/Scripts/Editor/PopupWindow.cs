@@ -1,5 +1,6 @@
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
+using Sirenix.OdinEditorWindow;
 #else
 using DaftAppleGames.Attributes;
 #endif

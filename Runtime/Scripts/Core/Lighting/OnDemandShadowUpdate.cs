@@ -1,6 +1,9 @@
 using System;
 #if DAG_HDRP
 #if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#else
+using DaftAppleGames.Attributes;
 #endif
 
 namespace DaftAppleGames.Lighting
