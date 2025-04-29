@@ -107,7 +107,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void RunToolClicked()
         {
-            if (!CanRunTool(SelectedGameObject, out List<string> cannotRunReasons))
+            if (!CanRunTool(out List<string> cannotRunReasons))
             {
                 log.AddToLog(LogLevel.Error, cannotRunReasons);
                 return;
@@ -126,7 +126,7 @@ namespace DaftAppleGames.Editor
             log.AddToLog(LogLevel.Info, $"Running: {GetToolName()}...");
 
             // Run the tool
-            RunTool(SelectedGameObject, undoGroupName);
+            RunTool(undoGroupName);
 
             // Collapse all undo operations into a single entry
             Undo.CollapseUndoOperations(undoGroup);
@@ -169,11 +169,11 @@ namespace DaftAppleGames.Editor
         /// <summary>
         /// Return true if the tool can run with the given parameters, otherwise false
         /// </summary>
-        protected abstract bool CanRunTool(GameObject selectedGameObject, out List<string> cannotRunReasons);
+        protected abstract bool CanRunTool(out List<string> cannotRunReasons);
 
         /// <summary>
         /// Runs the tool, on the basis that inputs are valid
         /// </summary>
-        protected abstract void RunTool(GameObject selectedGameObject, string undoGroupName);
+        protected abstract void RunTool(string undoGroupName);
     }
 }
