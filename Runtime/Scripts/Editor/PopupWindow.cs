@@ -39,7 +39,7 @@ namespace DaftAppleGames.Editor
             Rect main = EditorGUIUtility.GetMainWindowPosition();
             Rect popup = position;
             popup.width = 500;
-            popup.height = 200;
+            popup.height = 150;
             popup.x = main.x + (main.width - popup.width) * 0.5f;
             popup.y = main.y + (main.height - popup.height) * 0.5f;
             position = popup;
