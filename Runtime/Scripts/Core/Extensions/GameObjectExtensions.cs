@@ -5,8 +5,6 @@ namespace DaftAppleGames.Extensions
 {
     public static class GameObjectExtensions
     {
-        #region Class Methods
-
         /// <summary>
         /// Wraps up Get and Add to either return a component if it exists, otherwise create and return a new instance
         /// </summary>
@@ -130,6 +128,4 @@ namespace DaftAppleGames.Extensions
             return false;
         }
     }
-
-    #endregion
 }

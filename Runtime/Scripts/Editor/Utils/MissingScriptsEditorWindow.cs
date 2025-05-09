@@ -37,8 +37,6 @@ namespace DaftAppleGames.Editor
             editorWindow.titleContent = new GUIContent("Missing Scripts Tool");
         }
 
-        #region UI creation
-
         protected override void CreateCustomGUI()
         {
             // Register buttons
@@ -82,8 +80,6 @@ namespace DaftAppleGames.Editor
             listView.showBoundCollectionSize = false;
             listView.SetEnabled(false);
         }
-
-        #endregion
 
         /// <summary>
         ///     Button handler for Find Scripts in scene

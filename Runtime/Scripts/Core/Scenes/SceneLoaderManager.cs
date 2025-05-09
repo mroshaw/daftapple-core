@@ -5,7 +5,6 @@ using Sirenix.OdinInspector;
 #else
 using DaftAppleGames.Attributes;
 #endif
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -33,8 +32,8 @@ namespace DaftAppleGames.Scenes
         /// <summary>
         /// Internal class for metadata related to each scene
         /// </summary>
-
         [BoxGroup("Behaviour")] [SerializeField] private SceneFader sceneFader;
+
         [BoxGroup("Scenes")] [SerializeField] private string mainMenuLoaderScene;
         [BoxGroup("Scenes")] [SerializeField] private string gameLoaderScene;
 
@@ -51,18 +50,6 @@ namespace DaftAppleGames.Scenes
         private SceneLoadStatus _sceneLoadStatus;
 
         private bool _isLoading;
-        private bool _hasLoaded = false;
-        private bool _hasActivated = false;
-
-        #region Startup
-        #endregion
-
-        #region Update
-
-
-        #endregion
-
-        #region Event Handlers
 
         private void ThisSceneLoadedHandler(Scene scene, LoadSceneMode mode)
         {
@@ -70,13 +57,12 @@ namespace DaftAppleGames.Scenes
         }
 
 #if UNITY_EDITOR
-        private void EditorSceneLoadedHandler(Scene scene, LoadSceneMode mode)
+        private void EditorSceneLoadedHandler(Scene scene, LoadSceneMode _)
         {
             Debug.Log($"AdditiveSceneManager: Editor Scene Loaded detected: {scene.name}");
         }
 #endif
 
-        #endregion
 
         public void LoadMainMenuLoaderScene(bool fadeOut = true)
         {

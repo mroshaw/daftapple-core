@@ -9,19 +9,27 @@ using DaftAppleGames.Attributes;
 
 namespace DaftAppleGames.Gameplay
 {
+    /// <summary>
+    /// Provides an abstract base class for components that respond to colliders with given tags and layers entering and exiting a collider
+    /// on the component game object
+    /// </summary>
     public abstract class ActionTrigger : MonoBehaviour
     {
-        #region Class Variables
-
         [BoxGroup("Collider Settings")] [Tooltip("Trigger will only fire if the collider has any one of these tags.")] [SerializeField] private string[] triggerTags;
-        [Tooltip("Trigger will only fire if the collider is on any one of these layers.")] [SerializeField] protected LayerMask triggerLayerMask;
-        [Tooltip("Colliders marked as triggers will be ignored.")] [SerializeField] protected bool ignoreTriggers;
+        [BoxGroup("Collider Settings")] [Tooltip("Trigger will only fire if the collider is on any one of these layers.")] [SerializeField] protected LayerMask triggerLayerMask;
+        [BoxGroup("Collider Settings")] [Tooltip("Colliders marked as triggers will be ignored.")] [SerializeField] protected bool ignoreTriggers;
         [BoxGroup("Events")] public UnityEvent<Collider> triggerEnterEvent;
         [BoxGroup("Events")] public UnityEvent<Collider> triggerExitEvent;
 
-        #endregion
+        public string[] TriggerTags
+        {
+            set => triggerTags = value;
+        }
 
-        #region Startup
+        public LayerMask TriggerLayerMask
+        {
+            set => triggerLayerMask = value;
+        }
 
         /// <summary>
         /// Configure the component on awake
@@ -33,8 +41,6 @@ namespace DaftAppleGames.Gameplay
                 Debug.LogError($"CharacterTrigger: There is no collider on this gameobject! {gameObject}");
             }
         }
-
-        #endregion
 
         private void OnTriggerEnter(Collider other)
         {
@@ -82,17 +88,5 @@ namespace DaftAppleGames.Gameplay
 
         protected abstract void TriggerEnter(Collider other);
         protected abstract void TriggerExit(Collider other);
-
-        #region Unity Editor methods
-
-#if UNITY_EDITOR
-        public virtual void ConfigureInEditor(LayerMask newTriggerLayerMask, string[] newTriggerTags)
-        {
-            triggerLayerMask = newTriggerLayerMask;
-            triggerTags = newTriggerTags;
-        }
-#endif
-
-        #endregion
     }
 }

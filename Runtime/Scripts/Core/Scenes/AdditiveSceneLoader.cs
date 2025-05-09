@@ -11,7 +11,6 @@ using Sirenix.OdinInspector;
 #if GPU_INSTANCER
 using GPUInstancer;
 #endif
-
 #else
 using DaftAppleGames.Attributes;
 #endif
@@ -39,7 +38,7 @@ namespace DaftAppleGames.Scenes
         public SceneLoadStatus SceneLoadStatus => _sceneLoadStatus;
         private SceneLoadStatus _sceneLoadStatus;
 
-        private bool _scenesReady = false;
+        private bool _scenesReady;
 
 #if GPU_INSTANCER
         private bool _gpuInstancerDetailReady;
@@ -188,7 +187,6 @@ namespace DaftAppleGames.Scenes
         private void UnloadScenesInEditor()
         {
             int countLoaded = SceneManager.sceneCount;
-            Scene activeScene = EditorSceneManager.GetActiveScene();
             Scene[] loadedScenes = new Scene[countLoaded];
 
             // Get array of active scenes
@@ -198,12 +196,12 @@ namespace DaftAppleGames.Scenes
             }
 
             // Close all but the open one
-            for (int i = countLoaded - 1; i >= 0 ; i--)
+            for (int i = countLoaded - 1; i >= 0; i--)
             {
                 Scene currScene = loadedScenes[i];
                 if (currScene.name != additiveSceneLoaderSettings.loaderScene.sceneName)
                 {
-                    EditorSceneManager.UnloadScene(currScene);
+                    EditorSceneManager.UnloadSceneAsync(currScene);
                 }
             }
         }
@@ -211,7 +209,7 @@ namespace DaftAppleGames.Scenes
 
 #if UNITY_EDITOR
         [Button("Load Scenes")]
-        public void LoadScenesInEditor()
+        private void LoadScenesInEditor()
         {
             foreach (AdditiveScene additiveScene in additiveSceneLoaderSettings.additiveScenes)
             {
@@ -360,7 +358,7 @@ namespace DaftAppleGames.Scenes
             }
         }
 
-        public void LoadAndActivateAllScenes()
+        private void LoadAndActivateAllScenes()
         {
             InitLoadStatus();
             Debug.Log($"Total Additive Scenes:{additiveSceneLoaderSettings.additiveScenes.Count}");
@@ -370,14 +368,7 @@ namespace DaftAppleGames.Scenes
 
         private void ShowProgress()
         {
-            if (showProgress)
-            {
-                progressPanel.SetActive(true);
-            }
-            else
-            {
-                progressPanel.SetActive(false);
-            }
+            progressPanel.SetActive(showProgress);
         }
 
         private void HideProgress()

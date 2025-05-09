@@ -18,8 +18,6 @@ namespace DaftAppleGames.Pooling
 
     public class PrefabPool : MonoBehaviour
     {
-        #region Class Variables
-
         [BoxGroup("Prefab Settings")] [SerializeField] private PrefabPoolType prefabPoolType;
         [BoxGroup("Prefab Settings")] [SerializeField] private bool destroyAfterDelay = true;
         [ShowIf("destroyAfterDelay")] [BoxGroup("Prefab Settings")] [SerializeField] private float lifeTimeInSeconds;
@@ -38,10 +36,6 @@ namespace DaftAppleGames.Pooling
 
         internal int ActivePoolSize => _prefabInstancePool.CountActive;
 
-        #endregion
-
-        #region Startup
-
         /// <summary>
         /// Configure the component on awake
         /// </summary>   
@@ -52,9 +46,6 @@ namespace DaftAppleGames.Pooling
                 poolInitialSize, poolMaxSize);
         }
 
-        #endregion
-
-        #region Update
 
         /*
         private void Update()
@@ -64,10 +55,6 @@ namespace DaftAppleGames.Pooling
         }
 
         */
-
-        #endregion
-
-        #region Class methods
 
         public GameObject SpawnInstance(Vector3 spawnPosition, Quaternion spawnRotation)
         {
@@ -121,7 +108,5 @@ namespace DaftAppleGames.Pooling
         {
             Destroy(prefabInstance);
         }
-
-        #endregion
     }
 }

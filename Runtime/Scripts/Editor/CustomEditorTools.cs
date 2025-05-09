@@ -10,8 +10,6 @@ namespace DaftAppleGames.Editor
     /// </summary>
     public static class CustomEditorTools
     {
-        #region Class methods
-
         /// <summary>
         /// Sets a script define based on the active render pipeline in the project
         /// Runs immediately when the editor loads
@@ -197,7 +195,5 @@ namespace DaftAppleGames.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
-
-        #endregion
     }
 }
