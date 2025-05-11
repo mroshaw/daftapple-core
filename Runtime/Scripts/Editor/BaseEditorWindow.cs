@@ -91,7 +91,7 @@ namespace DaftAppleGames.Editor
             titleText = ToolTitle;
             introText = IntroText;
 
-            Log.AddToLog(LogLevel.Info, WelcomeLogText);
+            Log.AddToLogNoConsole(LogLevel.Info, WelcomeLogText);
 
             CreateCustomGUI();
 

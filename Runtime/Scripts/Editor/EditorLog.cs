@@ -37,6 +37,15 @@ namespace DaftAppleGames.Editor
             AddToLog(LogLevel.Info, logEntry);
         }
 
+        /// <summary>
+        /// Adds to the log without ever mirroring to the console. Useful for things like welcome messages
+        /// </summary>
+        public void AddToLogNoConsole(LogLevel logLevel, string logEntry)
+        {
+            _logEntries.Add(logEntry);
+            LogChangedEvent?.Invoke(this);
+        }
+
         public void AddToLog(LogLevel logLevel, List<string> logEntries, bool forceLog = false)
         {
             foreach (string entry in logEntries)

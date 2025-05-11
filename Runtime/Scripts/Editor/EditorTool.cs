@@ -17,6 +17,8 @@ namespace DaftAppleGames.Editor
     /// </summary>
     [Serializable] public abstract class EditorTool : EnhancedScriptableObject
     {
+        [BoxGroup("Settings")] [SerializeField] private string toolNameAppendix;
+
         // Use a local instance to avoid writing changes to the asset
         private ButtonWizardEditorSettings _localEditorSettingsInstance;
 
@@ -47,7 +49,7 @@ namespace DaftAppleGames.Editor
             // Create the run tool button
             Button runToolButton = new()
             {
-                text = GetToolName()
+                text = string.IsNullOrEmpty(toolNameAppendix) ? GetToolName() : $"{GetToolName()} ({toolNameAppendix})"
             };
             runToolButton.AddToClassList("StretchButton");
 
