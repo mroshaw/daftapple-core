@@ -17,7 +17,8 @@ namespace DaftAppleGames.Editor
     /// </summary>
     [Serializable] public abstract class EditorTool : EnhancedScriptableObject
     {
-        [BoxGroup("Settings")] [SerializeField] private string toolNameAppendix;
+        [BoxGroup("Editor Settings")] [SerializeField]
+        [Tooltip("If set, this text will be appended to the tool name text on the editor tool button.")] private string toolNameAppendix;
 
         // Use a local instance to avoid writing changes to the asset
         private ButtonWizardEditorSettings _localEditorSettingsInstance;
