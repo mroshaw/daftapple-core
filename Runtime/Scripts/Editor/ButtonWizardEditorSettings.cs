@@ -22,6 +22,12 @@ namespace DaftAppleGames.Editor
 
             foreach (EditorTool editorTool in toolsList)
             {
+                if (!editorTool)
+                {
+                    Debug.LogWarning($"An Editor Tool in the {name} settings is null. Please check the instance asset!");
+                    continue;
+                }
+
                 rootElement.Add(editorTool.InitTool(baseButtonWizardEditorWindow, log));
             }
 

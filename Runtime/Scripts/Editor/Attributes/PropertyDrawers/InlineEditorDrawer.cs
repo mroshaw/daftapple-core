@@ -9,6 +9,11 @@ namespace DaftAppleGames.Editor.Attributes
     public class InlineEditorDrawer : PropertyDrawerBase
     {
         private const string TypeWarningMessage = "{0} must be a scriptable object";
+        private const string SharedAssetWarningMessage = "This is a shared asset. Changes will affect all references to this asset.";
+
+        private const float FoldoutWidth = 20f;
+        private const float IconWidth = 18f;
+        private const float IconPadding = 2f;
 
         // Stores foldout states per property
         private static readonly Dictionary<string, bool> FoldoutStates = new();
@@ -48,13 +53,36 @@ namespace DaftAppleGames.Editor.Attributes
             }
 
             // Draw the object field with a foldout toggle
-            Rect foldoutRect = new(rect.x, rect.y, 20f, EditorGUIUtility.singleLineHeight);
-            Rect objectFieldRect = new(rect.x + 20f, rect.y, rect.width - 20f, EditorGUIUtility.singleLineHeight);
+            // Rect foldoutRect = new(rect.x, rect.y, 20f, EditorGUIUtility.singleLineHeight);
+            // Rect objectFieldRect = new(rect.x + 20f, rect.y, rect.width - 20f, EditorGUIUtility.singleLineHeight);
+
+            Rect foldoutRect = new(rect.x, rect.y, FoldoutWidth, EditorGUIUtility.singleLineHeight);
+            Rect objectFieldRect = new(
+                rect.x + FoldoutWidth,
+                rect.y,
+                rect.width - FoldoutWidth - IconWidth - IconPadding,
+                EditorGUIUtility.singleLineHeight
+            );
+            Rect iconRect = new(
+                rect.x + rect.width - IconWidth,
+                rect.y,
+                IconWidth,
+                EditorGUIUtility.singleLineHeight
+            );
+
 
             FoldoutStates[key] = EditorGUI.Foldout(foldoutRect, FoldoutStates[key], GUIContent.none);
             EditorGUI.BeginProperty(rect, label, property);
             property.objectReferenceValue = EditorGUI.ObjectField(objectFieldRect, label, property.objectReferenceValue, fieldInfo.FieldType, false);
             EditorGUI.EndProperty();
+
+            // Display a warning if the property is an asset instance
+            if (property.objectReferenceValue != null && EditorUtility.IsPersistent(property.objectReferenceValue))
+            {
+                GUIContent warningContent = EditorGUIUtility.IconContent("console.infoicon");
+                warningContent.tooltip = SharedAssetWarningMessage;
+                GUI.Label(iconRect, warningContent);
+            }
 
             // Draw the inline editor only if expanded and not null
             if (FoldoutStates[key] && property.objectReferenceValue != null)
