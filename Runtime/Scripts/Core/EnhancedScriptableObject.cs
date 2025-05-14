@@ -7,7 +7,7 @@ using Sirenix.OdinInspector;
 using DaftAppleGames.Attributes;
 #endif
 
-namespace DaftAppleGames.Editor
+namespace DaftAppleGames.Core
 {
     /// <summary>
     /// Adds some additional functionality to the basic ScriptableObject class
