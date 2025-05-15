@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using DaftAppleGames.Attributes;
+using DaftAppleGames.Editor.Extensions;
 using UnityEditor;
 using UnityEngine;
+
 
 namespace DaftAppleGames.Editor.Attributes
 {
@@ -12,7 +14,7 @@ namespace DaftAppleGames.Editor.Attributes
         private const string SharedAssetWarningMessage = "This is a shared asset. Changes will affect all references to this asset.";
 
         private const float FoldoutWidth = 20f;
-        private const float IconWidth = 18f;
+        private static readonly float IconSize = EditorGUIUtility.singleLineHeight;
         private const float IconPadding = 2f;
 
         // Stores foldout states per property
@@ -21,13 +23,31 @@ namespace DaftAppleGames.Editor.Attributes
 
         protected override float GetPropertyHeight_Internal(SerializedProperty property, GUIContent label)
         {
-            string key = property.propertyPath;
-            float height = IsValidProperty() ? GetPropertyHeight(property) : GetPropertyHeight(property) + GetHelpBoxHeight();
+            float height = EditorGUIUtility.singleLineHeight;
 
-            if (FoldoutStates.TryGetValue(key, out bool expanded) && expanded && property.objectReferenceValue != null)
+            if (!property.isExpanded || property.objectReferenceValue == null)
             {
-                // We let GUILayout handle vertical space, so return extra height for spacing only
-                height += EditorGUIUtility.standardVerticalSpacing * 2f;
+                return height;
+            }
+
+            UnityEditor.Editor.CreateCachedEditor(property.objectReferenceValue, null, ref _inlineEditor);
+
+            if (_inlineEditor != null)
+            {
+                SerializedObject so = _inlineEditor.serializedObject;
+                SerializedProperty prop = so.GetIterator();
+                if (prop.NextVisible(true))
+                {
+                    do
+                    {
+                        if (prop.name == "m_Script")
+                        {
+                            continue;
+                        }
+
+                        height += EditorGUI.GetPropertyHeight(prop, true) + EditorGUIUtility.standardVerticalSpacing;
+                    } while (prop.NextVisible(false));
+                }
             }
 
             return height;
@@ -44,67 +64,64 @@ namespace DaftAppleGames.Editor.Attributes
                 return;
             }
 
-            string key = property.propertyPath;
-
-            // Ensure state exists for this property
-            if (!FoldoutStates.ContainsKey(key))
-            {
-                FoldoutStates[key] = false;
-            }
-
-            // Draw the object field with a foldout toggle
-            // Rect foldoutRect = new(rect.x, rect.y, 20f, EditorGUIUtility.singleLineHeight);
-            // Rect objectFieldRect = new(rect.x + 20f, rect.y, rect.width - 20f, EditorGUIUtility.singleLineHeight);
-
-            Rect foldoutRect = new(rect.x, rect.y, FoldoutWidth, EditorGUIUtility.singleLineHeight);
-            Rect objectFieldRect = new(
-                rect.x + FoldoutWidth,
-                rect.y,
-                rect.width - FoldoutWidth - IconWidth - IconPadding,
-                EditorGUIUtility.singleLineHeight
-            );
-            Rect iconRect = new(
-                rect.x + rect.width - IconWidth,
-                rect.y,
-                IconWidth,
-                EditorGUIUtility.singleLineHeight
-            );
-
-
-            FoldoutStates[key] = EditorGUI.Foldout(foldoutRect, FoldoutStates[key], GUIContent.none);
             EditorGUI.BeginProperty(rect, label, property);
-            property.objectReferenceValue = EditorGUI.ObjectField(objectFieldRect, label, property.objectReferenceValue, fieldInfo.FieldType, false);
-            EditorGUI.EndProperty();
 
-            // Display a warning if the property is an asset instance
-            if (property.objectReferenceValue != null && EditorUtility.IsPersistent(property.objectReferenceValue))
+            // Draw property field (with foldout and object picker)
+            Rect fieldRect = new(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
+
+            // Calculate foldout arrow rect
+            Rect foldoutRect = new(fieldRect.x, fieldRect.y, 16f, IconSize);
+            Rect objectFieldRect = new(fieldRect.x + 16f, fieldRect.y, fieldRect.width - 16f - IconSize - IconPadding, IconSize);
+            Rect iconRect = new(rect.xMax - IconSize, rect.y, IconSize, IconSize);
+
+            property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, GUIContent.none, true);
+            EditorGUI.PropertyField(objectFieldRect, property, label);
+
+            // Show info icon if it's an asset (i.e., not embedded SO)
+            if (property.objectReferenceValue != null && AssetDatabase.Contains(property.objectReferenceValue))
             {
-                GUIContent warningContent = EditorGUIUtility.IconContent("console.infoicon");
-                warningContent.tooltip = SharedAssetWarningMessage;
-                GUI.Label(iconRect, warningContent);
+                GUIContent infoIcon = EditorGUIUtility.IconContent("console.infoicon");
+                infoIcon.tooltip = "This object is an asset. Editing it here will affect all usages.";
+                GUI.Label(iconRect, infoIcon);
             }
 
-            // Draw the inline editor only if expanded and not null
-            if (FoldoutStates[key] && property.objectReferenceValue != null)
+            // Inline editor for the SO
+            if (property.isExpanded && property.objectReferenceValue != null)
             {
-                EditorGUI.indentLevel++;
-
-                // Create or reuse the cached editor
-                if (_inlineEditor == null || _inlineEditor.target != property.objectReferenceValue)
-                {
-                    UnityEditor.Editor.CreateCachedEditor(property.objectReferenceValue, null, ref _inlineEditor);
-                }
+                UnityEditor.Editor.CreateCachedEditor(property.objectReferenceValue, null, ref _inlineEditor);
 
                 if (_inlineEditor != null)
                 {
-                    EditorGUILayout.Space(4);
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                    _inlineEditor.OnInspectorGUI();
-                    EditorGUILayout.EndVertical();
-                }
+                    SerializedObject so = _inlineEditor.serializedObject;
+                    so.Update();
 
-                EditorGUI.indentLevel--;
+                    SerializedProperty prop = so.GetIterator();
+                    float yOffset = rect.y + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+
+                    EditorGUI.indentLevel++;
+                    if (prop.NextVisible(true))
+                    {
+                        do
+                        {
+                            if (prop.name == "m_Script")
+                            {
+                                continue;
+                            }
+
+                            float propHeight = EditorGUI.GetPropertyHeight(prop, true);
+                            Rect propRect = new(rect.x, yOffset, rect.width, propHeight);
+                            EditorGUI.PropertyField(propRect, prop, true);
+                            yOffset += propHeight + EditorGUIUtility.standardVerticalSpacing;
+                        } while (prop.NextVisible(false));
+                    }
+
+                    EditorGUI.indentLevel--;
+
+                    so.ApplyModifiedProperties();
+                }
             }
+
+            EditorGUI.EndProperty();
         }
 
         private bool IsValidProperty()
