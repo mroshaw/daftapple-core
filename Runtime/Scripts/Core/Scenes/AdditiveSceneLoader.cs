@@ -209,7 +209,7 @@ namespace DaftAppleGames.Scenes
 
 #if UNITY_EDITOR
         [Button("Load Scenes")]
-        private void LoadScenesInEditor()
+        public void LoadScenesInEditor()
         {
             foreach (AdditiveScene additiveScene in additiveSceneLoaderSettings.additiveScenes)
             {
