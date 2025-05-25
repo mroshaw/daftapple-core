@@ -30,7 +30,7 @@ namespace DaftAppleGames.Editor
             "Welcome to the Missing Script Tool! Click one of the buttons above to manage missing scripts in your scene and prefab assets.\n" +
             "WARNING: Finding missing scripts in assets can take several minutes!";
 
-        [MenuItem("Daft Apple Games/Tools/Missing Script Editor")]
+        [MenuItem("Tools/Daft Apple Games/Editor Tools/Missing Script Tool")]
         public static void ShowWindow()
         {
             MissingScriptsEditorWindow editorWindow = GetWindow<MissingScriptsEditorWindow>();

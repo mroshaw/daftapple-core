@@ -79,7 +79,7 @@ namespace DaftAppleGames.Editor.Utils
             return false;
         }
 
-        [MenuItem("Daft Apple Games/Tools/Toggle LOD Parent Selection")]
+        [MenuItem("Tools/Daft Apple Games/Editor Tools/Toggle LOD Parent Selection")]
         public static void ToggleFunctionality()
         {
             _isEnabled = !_isEnabled;
