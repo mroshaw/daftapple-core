@@ -5,7 +5,7 @@ using Sirenix.OdinInspector;
 using DaftAppleGames.Attributes;
 #endif
 
-namespace DaftAppleGames.Core.Utilities
+namespace DaftAppleGames.Utilities
 {
     /// <summary>
     /// Simple component to unparent a GameObject on start or awake
