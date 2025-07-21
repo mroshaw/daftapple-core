@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using DaftAppleGames.Core;
+using DaftAppleGames.Utilities;
 using UnityEngine;
 using UnityEngine.UIElements;
 #if ODIN_INSPECTOR

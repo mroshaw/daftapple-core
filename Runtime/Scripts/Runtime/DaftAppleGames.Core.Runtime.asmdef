@@ -1,5 +1,5 @@
 {
-    "name": "DaftAppleGames.Core",
+    "name": "DaftAppleGames.Core.Runtime",
     "rootNamespace": "",
     "references": [
         "GUID:74b7ab95492e74e49804395faecc2951",
