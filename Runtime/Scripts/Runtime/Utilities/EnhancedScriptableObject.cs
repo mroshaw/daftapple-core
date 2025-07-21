@@ -14,6 +14,7 @@ namespace DaftAppleGames.Utilities
     /// </summary>
     public abstract class EnhancedScriptableObject : ScriptableObject
     {
+#if UNITY_EDITOR
         /// <summary>
         /// Opens a Save dialog and allows the user to save a copy of this ScriptableObject instance
         /// </summary>
@@ -85,5 +86,6 @@ namespace DaftAppleGames.Utilities
             AssetDatabase.CreateAsset(scriptableObjectInstanceCopy, relativePath);
             return scriptableObjectInstanceCopy;
         }
+#endif
     }
 }
