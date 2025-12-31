@@ -42,7 +42,7 @@ namespace DaftAppleGames.Editor
             "This tool will help you find and remove missing scripts from the current scene or all asset files.";
         protected override string WelcomeLogText => "Welcome to the Missing Scripts tool!";
 
-        [MenuItem("Tools/Missing Scripts Tool")]
+        [MenuItem("Tools/Daft Apple Games/Editor Tools/Missing Scripts Tool")]
         public static void ShowWindow()
         {
             MissingScriptsEditorWindow editorWindow = GetWindow<MissingScriptsEditorWindow>();
@@ -112,6 +112,9 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void ConfigureListView(ListView listView, List<GameObject> objectList, bool allowSceneObjects)
         {
+#if UNITY_2021_2_OR_NEWER
+            listView.showBoundCollectionSize = false;
+#else
             // Disable the collection count
             listView.RegisterCallback<GeometryChangedEvent>(_ =>
             {
@@ -123,7 +126,7 @@ namespace DaftAppleGames.Editor
                     Debug.Log("Removed count from list view");
                 }
             });
-
+#endif
             // Custom view to show only GameObject, as read-only
             listView.makeItem = () =>
             {
