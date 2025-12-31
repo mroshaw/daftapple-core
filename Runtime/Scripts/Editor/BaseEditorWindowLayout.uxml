@@ -1,19 +1,26 @@
-<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/daftapple-core/Runtime/Scripts/Editor/EditorWindowStyles.uss?fileID=7433441132597879392&amp;guid=b92b529d400a4f84db355c6f295a3efa&amp;type=3#EditorWindowStyles" />
-    <engine:VisualElement name="EditorWindow" class="EditorWindow">
-        <engine:Label name="TitleLabel" binding-path="titleText" text="Title Text" class="HeadingText" />
-        <engine:Label name="IntroText" binding-path="introText" text="Intro Test" class="IntroText" />
-        <engine:VisualElement name="CustomEditorContainer" class="CustomContentContainer" style="flex-shrink: 0;" />
-        <engine:VisualElement name="LoggingContainer" style="flex-grow: 1;">
-            <engine:Label text="Log:" name="LogLabel" class="Label" />
-            <engine:TextField name="LogText" binding-path="logText" multiline="true" readonly="true" vertical-scroller-visibility="AlwaysVisible" class="LogText" style="flex-direction: row; flex-shrink: 0; flex-grow: 1; bottom: 40px; top: 0;" />
-            <engine:VisualElement name="LoggingControlsContainer">
-                <engine:VisualElement name="LogCheckBoxContainer" class="HorizontalAlignContainer">
-                    <engine:Toggle label="Detailed logs:" name="DetailedLoggingToggle" class="Label" />
-                    <engine:Toggle label="Log to Console:" name="LogToConsoleToggle" value="true" class="Label" />
-                </engine:VisualElement>
-                <engine:Button text="Clear Log" name="ClearLogButton" class="Button" />
-            </engine:VisualElement>
-        </engine:VisualElement>
-    </engine:VisualElement>
-</engine:UXML>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="MainWindow" class="MainWindow" style="min-height: 450px;">
+        <Style src="EditorWindowStyles.uss" />
+        <ui:Label text="Title Label" name="TitleLabel" binding-path="titleText" class="TitleLabel" />
+        <ui:Label text="Instructions for use. ill go here and should even wrap around if it gets too big." name="InstructionLabel" binding-path="instructionText" class="InstructionLabel" style="flex-grow: 0;" />
+        <ui:VisualElement name="CustomEditorContainer" class="CustomEditorContainer" />
+        <ui:VisualElement name="FooterContainer" class="FooterContainer">
+            <ui:VisualElement name="LoggingContainer" style="margin-left: 5px; margin-right: 5px;">
+                <ui:Label text="Log:" name="LogLabel" class="ContainedLabel" />
+                <ui:ScrollView name="LogScrollView" class="LogScrollView">
+                    <ui:TextField picking-mode="Ignore" name="LogText" multiline="true" class="LogText" />
+                </ui:ScrollView>
+                <ui:VisualElement name="LogOptions" class="OptionsContainer">
+                    <ui:Toggle label="Detailed Logging:" name="DetailedLoggingToggle" class="Toggle" />
+                    <ui:Toggle label="Log to Console:" name="LogToConsoleToggle" value="true" class="Toggle" />
+                </ui:VisualElement>
+                <ui:Button text="Clear Log" name="ClearLogButton" class="WideButton" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ProgressContainer" class="ProgressContainer">
+                <ui:Slider picking-mode="Ignore" label="Progress" value="0" high-value="100" binding-path="processProgress" name="ProgressSlider" class="ProgressSlider" style="flex-grow: 1;" />
+                <ui:Label text="0%" name="ProgressLabel" class="Label" />
+                <ui:Button text="Cancel" name="CancelProcessButton" class="ProgressSlider" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

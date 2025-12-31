@@ -1,19 +1,20 @@
 {
-  "name": "DaftAppleGames.Editor",
-  "rootNamespace": "",
-  "references": [
-    "GUID:388f132624f9dfc408864ea2764b7698",
-    "GUID:29b6444c5b179644bb0d9ad13e6d0e89"
-  ],
-  "includePlatforms": [
-    "Editor"
-  ],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "DaftAppleGames.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:388f132624f9dfc408864ea2764b7698",
+        "GUID:29b6444c5b179644bb0d9ad13e6d0e89",
+        "GUID:478a2357cc57436488a56e564b08d223"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

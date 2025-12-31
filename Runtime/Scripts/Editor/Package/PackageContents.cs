@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -77,9 +78,9 @@ namespace DaftAppleGames.Editor.Package
             return isInstalled;
         }
 
-        public bool Install(EditorLog log)
+        public bool Install(out List<string> log)
         {
-            bool result = InstallPackage(log);
+            bool result = InstallPackage(out log);
             if (result)
             {
                 isInstalled = true;
@@ -88,11 +89,11 @@ namespace DaftAppleGames.Editor.Package
             return result;
         }
 
-        protected abstract bool InstallPackage(EditorLog log);
+        protected abstract bool InstallPackage(out List<string> log);
 
-        public bool UnInstall(EditorLog log)
+        public bool UnInstall(out List<string> log)
         {
-            bool result = UnInstallPackage(log);
+            bool result = UnInstallPackage(out log);
             if (result)
             {
                 isInstalled = false;
@@ -101,6 +102,6 @@ namespace DaftAppleGames.Editor.Package
             return result;
         }
 
-        protected abstract bool UnInstallPackage(EditorLog log);
+        protected abstract bool UnInstallPackage(out List<string> log);
     }
 }

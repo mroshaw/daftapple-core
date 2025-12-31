@@ -1,259 +1,90 @@
-.Button {
-    font-size: 14px;
-    padding-top: 4px;
-    padding-right: 4px;
-    padding-bottom: 4px;
-    padding-left: 4px;
-    margin-top: 5px;
-    margin-right: 10px;
-    margin-bottom: 5px;
+.MainWindow {
+    min-width: 350px;
+    min-height: 10px;
+}
+
+.TitleLabel {
+    font-size: 24px;
+    -unity-text-align: upper-center;
+    -unity-font-style: bold;
+    color: rgb(245, 255, 0);
     margin-left: 10px;
-    -unity-font-style: bold;
-}
-
-.Field {
-    padding-top: 3px;
-    padding-right: 3px;
-    padding-bottom: 3px;
-    padding-left: 3px;
-    margin-left: 15px;
     margin-right: 10px;
-    -unity-font-style: bold;
 }
 
-.InstructionText {
+.InstructionLabel {
+    color: rgb(97, 113, 255);
+    padding-left: 10px;
+    padding-right: 10px;
     flex-wrap: wrap;
     flex-grow: 0;
-    flex-direction: column;
-    text-overflow: clip;
-    letter-spacing: 0;
     white-space: normal;
-    padding-top: 3px;
-    padding-bottom: 1px;
-    padding-right: 3px;
-    padding-left: 3px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 5px;
 }
 
-.ScrollView {
-    flex-wrap: wrap;
-    flex-direction: row;
+.CustomEditorContainer {
     flex-grow: 1;
-}
-
-.Label {
-    margin-top: 5px;
-    margin-right: 10px;
-    margin-bottom: 0;
     margin-left: 10px;
-}
-
-.Dropdown {
-}
-
-.ScrollViewTextContainer {
-    flex-wrap: wrap;
-    white-space: normal;
-}
-
-.BigButton {
-    font-size: 22px;
-    padding-top: 5px;
-    padding-right: 5px;
-    padding-bottom: 5px;
-    padding-left: 5px;
-    margin-top: 5px;
     margin-right: 10px;
-    margin-bottom: 5px;
-    margin-left: 10px;
-    -unity-font-style: bold;
 }
 
-.EditorWindow {
-    height: 100%;
+.LogScrollView {
+    flex-grow: 0;
+    min-height: 100px;
+    max-height: 100px;
 }
 
 .LogText {
-    padding: 5px;
+    -unity-font-style: normal;
+    height: auto;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 1px;
     flex-grow: 1;
-    overflow: hidden;
-    height: 50%;
-    white-space: pre-wrap;
+    min-height: 100px;
 }
 
-.IntroText {
-    -unity-font-style: bold;
-    white-space: pre-wrap;
-    -unity-text-align: upper-center;
-    font-size: 14px;
-    color: rgb(128, 124, 255);
+.LogText #unity-text-input {
+    -unity-text-align: upper-left;
+    -unity-font-style: normal;
 }
 
-.HeadingText {
+.Label {
+    margin-left: 5px;
+}
+
+.Toggle {
+}
+
+.OptionsContainer {
+    flex-direction: row;
+}
+
+.ContainedLabel {
+}
+
+.WideButton {
     font-size: 18px;
-    color: rgb(204, 255, 4);
-    -unity-text-align: upper-center;
-    -unity-font-style: bold;
-    padding-top: 6px;
-    padding-right: 6px;
-    padding-bottom: 6px;
-    padding-left: 6px;
-}
-
-.CustomContentContainer {
-}
-
-.ToggleGroup {
-    align-items: flex-start;
-    flex-direction: column;
-}
-
-.CustomContentContainer {
-}
-
-.SkinnyButton {
-    font-size: 8px;
-    padding-top: 2px;
-    padding-right: 4px;
-    padding-bottom: 2px;
-    padding-left: 4px;
-    margin-top: 0;
-    margin-right: 10px;
-    margin-bottom: 0;
-    margin-left: 10px;
     -unity-font-style: bold;
 }
 
-.ListView {
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 5px;
-    padding-right: 5px;
+.ObjectListView {
+    height: 120px;
+    background-color: rgb(42, 42, 42);
 }
 
-.Foldout {
+.Spacer {
+    height: 15px;
 }
 
-.SkinnyButton {
-    font-size: 8px;
-    padding-top: 2px;
-    padding-right: 4px;
-    padding-bottom: 2px;
-    padding-left: 4px;
-    margin-top: 0;
-    margin-right: 10px;
-    margin-bottom: 0;
-    margin-left: 10px;
-    -unity-font-style: bold;
+.FooterContainer {
 }
 
-.OutlineContainer {
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-left-color: rgba(38, 38, 38, 0.37);
-    border-right-color: rgba(38, 38, 38, 0.37);
-    border-top-color: rgba(38, 38, 38, 0.37);
-    border-bottom-color: rgba(38, 38, 38, 0.37);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    padding-top: 2px;
-    padding-right: 2px;
-    padding-bottom: 2px;
-    padding-left: 2px;
-    margin-top: 2px;
-    margin-right: 2px;
-    margin-bottom: 2px;
-    margin-left: 2px;
-}
-
-.HorizontalAlignContainer {
+.ProgressContainer {
     flex-direction: row;
 }
 
-.DialogBodyText {
-    flex-wrap: wrap;
-    flex-grow: 0;
-    flex-direction: column;
-    text-overflow: clip;
-    letter-spacing: 0;
-    white-space: normal;
-    padding-top: 3px;
-    padding-bottom: 1px;
-    padding-right: 3px;
-    padding-left: 3px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 5px;
-    -unity-text-align: upper-center;
+.ProgressSlider {
 }
 
-.PopupWindow {
-    justify-content: space-between;
-    align-content: stretch;
-    height: 250px;
-    width: 400px;
-}
-
-.RowOutlineContainer {
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-left-color: rgba(38, 38, 38, 0.37);
-    border-right-color: rgba(38, 38, 38, 0.37);
-    border-top-color: rgba(38, 38, 38, 0.37);
-    border-bottom-color: rgba(38, 38, 38, 0.37);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    padding-top: 2px;
-    padding-right: 2px;
-    padding-bottom: 2px;
-    padding-left: 2px;
-    margin-top: 2px;
-    margin-right: 2px;
-    margin-bottom: 2px;
-    margin-left: 2px;
-    flex-direction: row;
-    align-items: center;
-}
-
-.FixedButton {
-    font-size: 14px;
-    padding-top: 4px;
-    padding-right: 4px;
-    padding-bottom: 4px;
-    padding-left: 4px;
-    margin-top: 0;
-    margin-right: 10px;
-    margin-bottom: 0;
-    margin-left: 0;
-    -unity-font-style: bold;
-}
-
-.RowContainer {
-    flex-direction: row;
-    align-items: center;
-}
-
-.StretchButton {
-    font-size: 14px;
-    padding-top: 4px;
-    padding-right: 4px;
-    padding-bottom: 4px;
-    padding-left: 4px;
-    margin-top: 5px;
-    margin-right: 10px;
-    margin-bottom: 5px;
-    margin-left: 10px;
-    -unity-font-style: bold;
-    flex-grow: 1;
-    flex-direction: row;
+.MiniButton {
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DaftAppleGames.Utilities;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -46,7 +47,7 @@ namespace DaftAppleGames.Editor
             }
 
             _toolButtonsContainer.Clear();
-            _toolButtonsContainer.Add(editorSettings.InitSettings(this, Log));
+            _toolButtonsContainer.Add(editorSettings.InitSettings(this, out List<string> log));
         }
 
         private void OnSelectionChange()

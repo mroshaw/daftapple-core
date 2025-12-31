@@ -40,11 +40,11 @@ namespace DaftAppleGames.Editor
         /// <summary>
         /// Construct the UI and bind the button click to the tool run method
         /// </summary>
-        protected internal virtual VisualElement InitTool(ButtonWizardEditorWindow editorWindow, EditorLog editorLog)
+        protected internal virtual VisualElement InitTool(ButtonWizardEditorWindow editorWindow, out List<String> initLog)
         {
-            log = editorLog;
             ParentEditorWindow = editorWindow;
-
+            initLog = new List<string>();
+            
             VisualElement toolContainer = new();
             toolContainer.AddToClassList("RowContainer");
 
@@ -113,7 +113,7 @@ namespace DaftAppleGames.Editor
         {
             if (!CanRunTool(out List<string> cannotRunReasons))
             {
-                log.AddToLog(LogLevel.Error, cannotRunReasons);
+                log.LogErrors(cannotRunReasons);
                 return;
             }
 
@@ -127,7 +127,7 @@ namespace DaftAppleGames.Editor
                 Undo.RegisterFullObjectHierarchyUndo(SelectedGameObject, undoGroupName);
             }
 
-            log.AddToLog(LogLevel.Info, $"Running: {GetToolName()}...");
+            log.LogInfo($"Running: {GetToolName()}...");
 
             // Run the tool
             RunTool(undoGroupName);
@@ -135,9 +135,12 @@ namespace DaftAppleGames.Editor
             // Collapse all undo operations into a single entry
             Undo.CollapseUndoOperations(undoGroup);
 
-            log.AddToLog(LogLevel.Info, $"Running: {GetToolName()}... DONE!");
+            log.LogInfo($"Running: {GetToolName()}... DONE!");
         }
 
+        /// <summary>
+        /// Handle clicking the settings button
+        /// </summary>
         private void SettingsClicked()
         {
             Selection.activeObject = this;

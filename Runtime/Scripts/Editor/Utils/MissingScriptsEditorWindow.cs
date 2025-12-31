@@ -1,177 +1,372 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Unity.EditorCoroutines.Editor;
 
 namespace DaftAppleGames.Editor
 {
     public class MissingScriptsEditorWindow : BaseEditorWindow
     {
-        [SerializeField] private List<string> missingAssetNames = new();
-        [SerializeField] private List<GameObject> objectsWithMissingScriptsInAssets = new();
-        [SerializeField] private List<GameObject> objectsWithMissingScriptsInScenes = new();
+        [SerializeField] private List<GameObject> sceneObjects = new List<GameObject>();
+        [SerializeField] private List<GameObject> assets = new List<GameObject>();
 
-        private Button _deleteMissingScriptsInAssetsButton;
-        private Button _deleteMissingScriptsInSceneButton;
-        private Button _findMissingScriptsInAssetsButton;
+        // Coroutine will yield after this many frames
+        private const int NumFramesBeforeYield = 60;
+        
+        private int _currFrameCount = 0;
+        
+        private List<string> _assetPaths = new List<string>();
+
         private Button _findMissingScriptsInSceneButton;
+        private Button _findMissingScriptsInAssetsButton;
+        private Button _deleteMissingScriptsInSceneButton;
+        private Button _deleteMissingScriptsInAssetsButton;
 
-        private ListView _objectsInSceneListView;
-        private ListView _assetObjectsListView;
+        private ListView _objectsListView;
+        private ListView _assetsListView;
 
-        /// <summary>
-        ///     Custom editor overrides
-        /// </summary>
-        protected override string ToolTitle => "Missing Scripts Tool";
+        private EditorCoroutine _coroutineHandle;
 
-        protected override string WelcomeLogText =>
-            "Welcome to the Missing Script Tool! Click one of the buttons above to manage missing scripts in your scene and prefab assets.\n" +
-            "WARNING: Finding missing scripts in assets can take several minutes!";
+        private int _totalObjectsToProcess;
+        private int _currentObjectProcessing;
+        
+        protected override string ToolTitle => "Missing Scripts";
+        protected override string IntroText =>
+            "This tool will help you find and remove missing scripts from the current scene or all asset files.";
+        protected override string WelcomeLogText => "Welcome to the Missing Scripts tool!";
 
-        [MenuItem("Tools/Daft Apple Games/Editor Tools/Missing Script Tool")]
+        [MenuItem("Tools/Missing Scripts Tool")]
         public static void ShowWindow()
         {
             MissingScriptsEditorWindow editorWindow = GetWindow<MissingScriptsEditorWindow>();
-            editorWindow.titleContent = new GUIContent("Missing Scripts Tool");
+            editorWindow.titleContent = new GUIContent("Missing Scripts");
         }
 
+        /// <summary>
+        /// Kill any running coroutines if window is closed
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_coroutineHandle != null)
+            {
+                EditorCoroutineUtility.StopCoroutine(_coroutineHandle);
+            }
+        }
+        
+        /// <summary>
+        /// Create the Missing Script editor window components
+        /// </summary>
         protected override void CreateCustomGUI()
         {
             // Register buttons
-            _findMissingScriptsInSceneButton = rootVisualElement.Q<Button>("FindMissingScriptsInSceneButton");
-            if (_findMissingScriptsInSceneButton != null)
+            InitButton("FindMissingScriptsInSceneButton", FindInSceneButtonClicked,
+                out _findMissingScriptsInSceneButton);
+            InitButton("FindMissingScriptsInAssetsButton", FindInAssetsButtonClicked,
+                out _findMissingScriptsInAssetsButton);
+            InitButton("DeleteInSceneButton", DeleteInSceneButtonClicked, out _deleteMissingScriptsInSceneButton);
+            InitButton("DeleteInAssetsButton", DeleteInAssetsButtonClicked, out _deleteMissingScriptsInAssetsButton);
+
+            // Configure Objects List
+            _objectsListView = rootVisualElement.Q<ListView>("SceneObjectsListView");
+            ConfigureListView(_objectsListView, sceneObjects, true);
+            _objectsListView.Rebuild();
+
+            // Configure Assets List
+            _assetsListView = rootVisualElement.Q<ListView>("AssetsListView");
+            ConfigureListView(_assetsListView, assets, false);
+            _assetsListView.Rebuild();
+            
+            SetReadyState();
+        }
+
+        /// <summary>
+        /// Cancel the in progress subroutine
+        /// </summary>
+        protected override void CancelProcess()
+        {
+            LogInfo("Process cancelled!");
+            SetReadyState();
+        }
+
+        /// <summary>
+        /// Stops an active coroutine
+        /// </summary>
+        private void CancelInProgressSubroutine()
+        {
+            if (_coroutineHandle != null)
             {
-                _findMissingScriptsInSceneButton.clicked -= FindInScene;
-                _findMissingScriptsInSceneButton.clicked += FindInScene;
+                EditorCoroutineUtility.StopCoroutine(_coroutineHandle);
+                ResetProcessProgress();
             }
-
-            _deleteMissingScriptsInSceneButton = rootVisualElement.Q<Button>("DeleteMissingScriptsInSceneButton");
-            if (_deleteMissingScriptsInSceneButton != null)
+        }
+        
+        /// <summary>
+        /// Consistently configure a List View control
+        /// </summary>
+        private void ConfigureListView(ListView listView, List<GameObject> objectList, bool allowSceneObjects)
+        {
+            // Disable the collection count
+            listView.RegisterCallback<GeometryChangedEvent>(_ =>
             {
-                _deleteMissingScriptsInSceneButton.clicked -= FindAndDeleteInScene;
-                _deleteMissingScriptsInSceneButton.clicked += FindAndDeleteInScene;
-            }
-
-            _findMissingScriptsInAssetsButton = rootVisualElement.Q<Button>("FindMissingScriptsInAssetsButton");
-            if (_findMissingScriptsInAssetsButton != null)
-            {
-                _findMissingScriptsInAssetsButton.clicked -= FindInAssets;
-                _findMissingScriptsInAssetsButton.clicked += FindInAssets;
-            }
-
-            _deleteMissingScriptsInAssetsButton = rootVisualElement.Q<Button>("DeleteMissingScriptsInAssetsButton");
-            if (_deleteMissingScriptsInAssetsButton != null)
-            {
-                _deleteMissingScriptsInAssetsButton.clicked -= FindAndDeleteInAssets;
-                _deleteMissingScriptsInAssetsButton.clicked += FindAndDeleteInAssets;
-            }
-
-            // Configure the object list views
-            _objectsInSceneListView = rootVisualElement.Q<ListView>("SceneGameObjectsListView");
-            ConfigureListView(_objectsInSceneListView);
-            _assetObjectsListView = rootVisualElement.Q<ListView>("AssetsObjectsListView");
-            ConfigureListView(_assetObjectsListView);
-        }
-
-        private static void ConfigureListView(ListView listView)
-        {
-            listView.showBoundCollectionSize = false;
-            listView.SetEnabled(false);
-        }
-
-        /// <summary>
-        ///     Button handler for Find Scripts in scene
-        /// </summary>
-        private void FindInScene()
-        {
-            Log.AddToLog(LogLevel.Info, "Searching for missing scripts in open scenes...");
-            FindMissingScriptsInOpenScenes(false);
-        }
-
-        /// <summary>
-        ///     Button handler for Find and Delete Scripts in scene
-        /// </summary>
-        private void FindAndDeleteInScene()
-        {
-            Log.AddToLog(LogLevel.Info, "Searching for and deleting missing scripts in open scenes...");
-            FindMissingScriptsInOpenScenes(true);
-        }
-
-        /// <summary>
-        ///     Button handler for Find Scripts in assets
-        /// </summary>
-        private void FindInAssets()
-        {
-            Log.AddToLog(LogLevel.Info, "Searching for missing scripts in assets...");
-            FindMissingScriptsInAssets(false);
-        }
-
-        /// <summary>
-        ///     Button handler for Find and Delete Scripts in assets
-        /// </summary>
-        private void FindAndDeleteInAssets()
-        {
-            Log.AddToLog(LogLevel.Info, "Searching for and deleting missing scripts in assets...");
-            FindMissingScriptsInAssets(true);
-        }
-
-        /// <summary>
-        ///     Find game objects in open scenes for missing scripts
-        /// </summary>
-        private void FindMissingScriptsInOpenScenes(bool deleteScripts)
-        {
-            objectsWithMissingScriptsInScenes.Clear();
-            GameObject[] allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
-            foreach (GameObject go in allObjects)
-            {
-                if (go.transform.parent == null) // Only start with root objects
+                // Remove the collection size field if present
+                var intField = listView.Q<IntegerField>();
+                if (intField != null)
                 {
-                    FindMissingScriptsInGameObjectAndChildren(go);
+                    intField.RemoveFromHierarchy();
+                    Debug.Log("Removed count from list view");
                 }
-            }
+            });
 
-            Log.AddToLog(LogLevel.Info, $"Found {objectsWithMissingScriptsInScenes.Count} missing script(s) in open scenes.");
-
-            if (deleteScripts)
+            // Custom view to show only GameObject, as read-only
+            listView.makeItem = () =>
             {
-                DeleteMissingScripts(objectsWithMissingScriptsInScenes);
-            }
+                var field = new ObjectField
+                {
+                    objectType = typeof(GameObject),
+                    allowSceneObjects = allowSceneObjects,
+                    style =
+                    {
+                        flexGrow = 1
+                    }
+                };
 
-            _objectsInSceneListView?.RefreshItems();
+                return field;
+            };
+
+            // Hide empty entries
+            listView.bindItem = (element, index) =>
+            {
+                var field = (ObjectField)element;
+
+                // Hide empty entries
+                if (objectList.Count == 0 || index >= objectList.Count || index < 0)
+                {
+                    field.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    var go = objectList[index];
+                    field.SetValueWithoutNotify(go);
+                    field.style.display = DisplayStyle.Flex;
+                }
+            };
         }
 
         /// <summary>
-        ///     Search through entire game object structure for missing scripts
+        /// Find and configure an Editor window button
         /// </summary>
-        private void FindMissingScriptsInGameObjectAndChildren(GameObject parentGameObject)
+        private void InitButton(string uiElementName, Action clickAction, out Button button)
         {
+            button = rootVisualElement.Q<Button>(uiElementName);
+            if (button != null)
+            {
+                button.clicked -= clickAction;
+                button.clicked += clickAction;
+            }
+            else
+            {
+                Debug.LogError($"Could not find {uiElementName}!");
+            }
+        }
+
+        /// <summary>
+        /// Handle the Find in Scene button click
+        /// </summary>
+        private void FindInSceneButtonClicked()
+        {
+            SetInProgressState();
+            _coroutineHandle = EditorCoroutineUtility.StartCoroutine(FindInSceneAsync(), this);
+        }
+
+        /// <summary>
+        /// Handle the Find in Assets button click
+        /// </summary>
+        private void FindInAssetsButtonClicked()
+        {
+           SetInProgressState();
+            _coroutineHandle = EditorCoroutineUtility.StartCoroutine(FindInAssetsAsync(), this);
+        }
+
+        /// <summary>
+        /// Handle the Delete in Scenes button click
+        /// </summary>
+        private void DeleteInSceneButtonClicked()
+        {
+            SetInProgressState();
+            _coroutineHandle = EditorCoroutineUtility.StartCoroutine(DeleteInScenesAsync(), this);
+        }
+
+        /// <summary>
+        /// Handle the Delete in Assets button click
+        /// </summary>
+        private void DeleteInAssetsButtonClicked()
+        {
+            SetInProgressState();
+            _coroutineHandle = EditorCoroutineUtility.StartCoroutine(DeleteInAssetsAsync(), this);
+        }
+
+        /// <summary>
+        /// Sets the state when the process is started
+        /// </summary>
+        private void SetInProgressState()
+        {
+            SetButonState(false);
+            CancelInProgressSubroutine();
+            StartProcess();
+        }
+
+        /// <summary>
+        /// Sets the state when the process is not started/ended
+        /// </summary>
+        private void SetReadyState()
+        {
+            SetButonState(true);
+            CancelInProgressSubroutine();
+            EndProcess();
+        }
+        
+        /// <summary>
+        /// Resets the process progress
+        /// </summary>
+        private void ResetProgress()
+        {
+            _totalObjectsToProcess = 0;
+            _currentObjectProcessing = 0;
+            UpdateProgress();
+        }
+        
+        /// <summary>
+        /// Updates the current process progress
+        /// </summary>
+        private void UpdateProgress()
+        {
+            float processPercentage = _totalObjectsToProcess > 0 ? (float)_currentObjectProcessing / _totalObjectsToProcess * 100 : 0;
+            LogDebug($"Progressing: {_currentObjectProcessing} of {_totalObjectsToProcess}. Percentage: {processPercentage}%");
+            SetProcessProgress(_totalObjectsToProcess > 0 ? processPercentage : 0);
+        }
+        
+        /// <summary>
+        /// Search through entire game object structure for missing scripts
+        /// </summary>
+        private IEnumerator FindMissingScriptsInGameObjectAndChildrenAsync(GameObject parentGameObject, GameObject rootGameObject,
+            string assetPath, bool delete)
+        {
+
+            _currFrameCount++;
+            
+            // Pause a frame
+            if (_currFrameCount % NumFramesBeforeYield == 0)
+            {
+                UpdateProgress();
+                _currFrameCount = 0;
+                yield return null;
+            }
+            
+            LogDebug($"Processing: {parentGameObject} on parent: {parentGameObject.name}");
             Component[] components = parentGameObject.GetComponents<Component>();
             bool hasMissingScript = components.Any(c => c == null);
             if (hasMissingScript)
             {
-                Log.AddToLog(LogLevel.Info, $"Found missing script on: {parentGameObject.name}");
-                objectsWithMissingScriptsInScenes.Add(parentGameObject);
+                if (delete)
+                {
+                    LogInfo($"Deleting missing script on: {parentGameObject.name}, root object: {rootGameObject.name}");
+                    GameObjectUtility.RemoveMonoBehavioursWithMissingScript(parentGameObject);
+                }
+                else
+                {
+                    LogInfo($"Found missing script on: {parentGameObject.name}, root object: {rootGameObject.name}");
+                    
+                    // This is a scene object
+                    if (string.IsNullOrEmpty(assetPath))
+                    {
+                        sceneObjects.Add(parentGameObject);
+                    }
+                    // This is an asset
+                    else
+                    {
+                        // Only add the root gameobject
+                        if (!assets.Contains(rootGameObject))
+                        {
+                            assets.Add(rootGameObject);
+                            _assetPaths.Add(assetPath);
+                        }
+                    }
+                }
             }
 
             foreach (Transform child in parentGameObject.transform) // Recursively check children
             {
-                FindMissingScriptsInGameObjectAndChildren(child.gameObject);
+                // Recurse
+                yield return FindMissingScriptsInGameObjectAndChildrenAsync(child.gameObject, rootGameObject, assetPath, delete);
             }
         }
 
         /// <summary>
-        ///     Search assets for objects with missing scripts
+        /// Find all objects in open scenes that contain missing scripts
         /// </summary>
-        private void FindMissingScriptsInAssets(bool deleteScripts)
+        private IEnumerator FindInSceneAsync()
         {
-            missingAssetNames.Clear();
-            objectsWithMissingScriptsInAssets.Clear();
+            LogInfo("Looking for missing scripts in open scenes...");
+            sceneObjects.Clear();
+            ResetProgress();
+            
+            GameObject[] allObjects = FindObjectsOfType<GameObject>();
+            _totalObjectsToProcess = allObjects.Length;
+            
+            foreach (GameObject parentGameObject in allObjects)
+            {
+                _currentObjectProcessing++;
+                if (parentGameObject.transform.parent == null) // Only start with root objects
+                {
+                    yield return
+                        FindMissingScriptsInGameObjectAndChildrenAsync(parentGameObject, parentGameObject, null, false);
+                }
+            }
+            OnSceneProcessingComplete();
+        }
 
+        /// <summary>
+        /// Delete missing scripts from those GameObjects that were identified
+        /// </summary>
+        private IEnumerator DeleteInScenesAsync()
+        {
+            LogInfo("Deleting missing scripts in open scenes...");
+            ResetProgress();
+            _totalObjectsToProcess = sceneObjects.Count;
+            
+            foreach (GameObject parentGameObject in sceneObjects.ToArray())
+            {
+                _currentObjectProcessing++;
+                Undo.RecordObject(parentGameObject, $"Delete Missing Script from {parentGameObject.name}");
+                yield return
+                    FindMissingScriptsInGameObjectAndChildrenAsync(parentGameObject, parentGameObject, null, false);
+            }
+            OnSceneProcessingComplete();
+        }
+
+        /// <summary>
+        /// Find Assets in the project that contain missing scripts
+        /// </summary>
+        private IEnumerator FindInAssetsAsync()
+        {
+            LogInfo("Looking for missing scripts in assets...");
+            assets.Clear();
+            _assetPaths.Clear();
+            ResetProgress();
             string[] allAssets = AssetDatabase.GetAllAssetPaths();
+            _totalObjectsToProcess = allAssets.Length;
+            
             foreach (string assetPath in allAssets)
             {
+                _currentObjectProcessing++;
+                
                 if (assetPath.StartsWith("Packages/"))
                 {
                     continue;
@@ -188,45 +383,77 @@ namespace DaftAppleGames.Editor
                     continue;
                 }
 
-                Component[] components = assetRoot.GetComponentsInChildren<Component>(true);
-                bool hasMissingScript = components.Any(c => c == null);
-                if (!hasMissingScript)
-                {
-                    continue;
-                }
-
-                Log.AddToLog(LogLevel.Info, $"Found missing script on: {assetRoot.name}");
-                missingAssetNames.Add(assetPath);
-                objectsWithMissingScriptsInAssets.Add(assetRoot);
+                yield return FindMissingScriptsInGameObjectAndChildrenAsync(assetRoot, assetRoot, assetPath, false);
             }
 
-            Log.AddToLog(LogLevel.Info, $"Found {objectsWithMissingScriptsInAssets.Count} missing script(s) in assets.");
-
-            if (deleteScripts)
-            {
-                DeleteMissingScripts(objectsWithMissingScriptsInAssets);
-            }
-
-            _assetObjectsListView?.RefreshItems();
+            OnAssetProcessingComplete();
         }
 
-        private void DeleteMissingScripts(List<GameObject> gameObjectsWithMissingScripts)
+        /// <summary>
+        /// Deletes empty scripts from all assets in the list
+        /// </summary>
+        private IEnumerator DeleteInAssetsAsync()
         {
-            Log.AddToLog(LogLevel.Info, "Deleting missing scripts...");
-            foreach (GameObject go in gameObjectsWithMissingScripts)
+            LogInfo("Deleting missing scripts in assets...");
+            ResetProgress();
+            _totalObjectsToProcess = _assetPaths.Count;
+            
+            foreach (string assetPath in _assetPaths)
             {
-                GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
-                Log.AddToLog($"Deleted missing script from: {go.name}");
-                if (!go.hideFlags.HasFlag(HideFlags.HideInHierarchy))
-                {
-                    continue;
-                }
+                _currentObjectProcessing++;
+                GameObject assetRoot = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
 
-                Log.AddToLog($"Revealing hidden GameObject: {go.name}");
-                go.hideFlags &= ~HideFlags.HideInHierarchy;
+                Undo.RecordObject(assetRoot, $"Delete Missing Script from {assetRoot}");
+                LogInfo($"Deleting missing scripts from asset: {assetPath}");
+                yield return FindMissingScriptsInGameObjectAndChildrenAsync(assetRoot, assetRoot, assetPath, true);
+                SaveAsset(assetRoot);
             }
 
-            Log.AddToLog(LogLevel.Info, "Deleting missing scripts... Done.");
+            OnAssetProcessingComplete();
+        }
+
+        /// <summary>
+        /// Update the Scene Objects list
+        /// </summary>
+        private void OnSceneProcessingComplete()
+        {
+            LogInfo($"Processed {sceneObjects.Count} missing script(s) in open scenes.");
+            _objectsListView.Rebuild();
+            EditorSceneManager.SaveOpenScenes();
+            SetReadyState();
+        }
+
+        /// <summary>
+        /// Update the Assets list
+        /// </summary>
+        private void OnAssetProcessingComplete()
+        {
+            LogInfo($"Processed {assets.Count} missing script(s) in assets.");
+            _assetsListView.Rebuild();
+            EditorSceneManager.SaveOpenScenes();
+            SetReadyState();
+        }
+
+        /// <summary>
+        /// Marks the asset as dirty and saves to disk
+        /// </summary>
+        private void SaveAsset(GameObject assetRoot)
+        {
+            LogInfo($"Saving {assetRoot} asset changes...");
+            EditorUtility.SetDirty(assetRoot);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.SaveOpenScenes();
+        }
+
+        /// <summary>
+        /// Sets the button state
+        /// </summary>
+        private void SetButonState(bool state)
+        {
+            _findMissingScriptsInSceneButton.SetEnabled(state);
+            _findMissingScriptsInAssetsButton.SetEnabled(state);
+            _deleteMissingScriptsInSceneButton.SetEnabled(state);
+            _deleteMissingScriptsInAssetsButton.SetEnabled(state);
         }
     }
 }

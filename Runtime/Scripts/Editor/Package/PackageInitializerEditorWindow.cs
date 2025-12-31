@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using DaftAppleGames.Editor.Package;
 using UnityEditor;
@@ -76,7 +77,7 @@ namespace DaftAppleGames.Editor
 
             if (!packageContents)
             {
-                Debug.LogError("No package contents found for installer to use!");
+                LogError("No package contents found for installer to use!");
             }
 
             // If the copy of the package already exists, use that from now on
@@ -92,13 +93,14 @@ namespace DaftAppleGames.Editor
         {
             if (!force && _localPackageCopy.IsAlreadyInstalled())
             {
-                Log.AddToLog(LogLevel.Error, "Already installed!");
+                LogError("Already installed!");
                 return;
             }
 
-            Log.AddToLog(LogLevel.Info, "Installing... ", true);
-            bool installResult = _localPackageCopy.Install(Log);
-            Log.AddToLog(LogLevel.Info, installResult ? "Install complete!" : "Install failed! Check logs!", true);
+            LogInfo( "Installing... ");
+            bool installResult = _localPackageCopy.Install(out List<string> installLogs);
+            LogInfo(installLogs);
+            LogInfo( installResult ? "Install complete!" : "Install failed! Check logs!");
             CustomEditorTools.SaveChangesToAsset(_localPackageCopy);
         }
 
@@ -106,26 +108,30 @@ namespace DaftAppleGames.Editor
         {
             if (!_localPackageCopy.IsAlreadyInstalled())
             {
-                Log.AddToLog(LogLevel.Error, "Package is not installed!!");
+                LogError("Package is not installed!!");
             }
 
-            Log.AddToLog(LogLevel.Info, "Uninstalling...", true);
-            bool installResult = _localPackageCopy.UnInstall(Log);
-            Log.AddToLog(LogLevel.Info, installResult ? "Uninstall complete!" : "Install failed! Check logs!", true);
+            LogInfo("Uninstalling...");
+            bool installResult = _localPackageCopy.UnInstall(out List<string> uninstallLogs);
+            LogInfo(uninstallLogs);
+            LogInfo(installResult ? "Uninstall complete!" : "Install failed! Check logs!");
         }
 
         private void ReInstall()
         {
             if (!_localPackageCopy.IsAlreadyInstalled())
             {
-                Log.AddToLog(LogLevel.Error, "Package is not installed!!");
+                LogError("Package is not installed!!");
             }
 
-            Log.AddToLog(LogLevel.Info, "Reinstalling...", true);
+            LogInfo("Reinstalling...");
             Install(true);
-            Log.AddToLog(LogLevel.Info, "Reinstall Complete!", true);
+            LogInfo("Reinstall Complete!");
         }
 
+        /// <summary>
+        /// Toggles the button states
+        /// </summary>
         private void SetButtonState(bool installedState)
         {
             _installButton.SetEnabled(!installedState);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DaftAppleGames.Utilities;
 using UnityEngine;
@@ -17,19 +18,20 @@ namespace DaftAppleGames.Editor
         /// <summary>
         /// Constructs the Tools by iterating over each tool and getting its UI
         /// </summary>
-        protected internal VisualElement InitSettings(ButtonWizardEditorWindow baseButtonWizardEditorWindow, EditorLog log)
+        protected internal VisualElement InitSettings(ButtonWizardEditorWindow baseButtonWizardEditorWindow, out List<string> log)
         {
             VisualElement rootElement = new();
-
+            log = new List<string>();
+            
             foreach (EditorTool editorTool in toolsList)
             {
                 if (!editorTool)
                 {
-                    Debug.LogWarning($"An Editor Tool in the {name} settings is null. Please check the instance asset!");
+                    log.Add($"An Editor Tool in the {name} settings is null. Please check the instance asset!");
                     continue;
                 }
 
-                rootElement.Add(editorTool.InitTool(baseButtonWizardEditorWindow, log));
+                rootElement.Add(editorTool.InitTool(baseButtonWizardEditorWindow, out log));
             }
 
             return rootElement;
